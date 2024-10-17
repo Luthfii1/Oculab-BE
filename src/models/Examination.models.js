@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { FOVDataSchema } = require("../../models/FOVData.model.js");
+const { FOVDataSchema } = require("./FOVData.models");
 
 const ExamGoalType = Object.freeze({
   SCREENING: "SCREENING",

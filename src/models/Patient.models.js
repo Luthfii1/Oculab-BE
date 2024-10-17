@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { ExaminationSchema } = require("../../models/examination.model");
+const { ExaminationSchema } = require("./Examination.models");
 
 const SexType = Object.freeze({
   MALE: "MALE",
@@ -40,4 +40,7 @@ const PatientSchema = new mongoose.Schema({
 });
 
 const Patient = mongoose.model("Patient", PatientSchema);
-module.exports = Patient;
+module.exports = {
+  Patient,
+  PatientSchema,
+};
