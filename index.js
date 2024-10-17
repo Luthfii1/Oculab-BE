@@ -8,10 +8,14 @@ const { Patient } = require('./models/patient.model.js');
 const {Examination} = require('./models/examination.model.js');
 const {FOVData} = require('./models/FOVData.model.js');
 // const { reset } = require('nodemon');
+const bodyParser = require('body-parser');
 
 const app = express();
 
 app.use(express.json());
+app.use(bodyParser.json({ limit: '32mb' }));
+app.use(bodyParser.urlencoded({ limit: '32mb', extended: true }));
+
 
 app.get('/', (req, res) => {
     res.send("Muncul yey");
