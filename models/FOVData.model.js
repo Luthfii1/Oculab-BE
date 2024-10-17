@@ -8,7 +8,7 @@ const FOVType = Object.freeze({
 
 const FOVDataSchema = new mongoose.Schema(
     {
-        id: {
+        _id: {
             type: String,
             required: true,
         },

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const {ExaminationSchema} = require('./examination.model');
+const {Schema} = mongoose;
 
 const SexType = Object.freeze({
     MALE: "MALE",
@@ -8,7 +9,7 @@ const SexType = Object.freeze({
 
 const PatientSchema = new mongoose.Schema(
     {
-        id: {
+        _id: {
             type: String,
             required: true,
         },
@@ -37,10 +38,15 @@ const PatientSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
-        resultExamination: [ExaminationSchema]
-
+        resultExamination: [ExaminationSchema],
+        // resultExamination: {
+        //     type: [Schema.Types.ObjectId], 
+        //     ref: "Examination"
+        // },
     },
 );
 
 const Patient = mongoose.model("Patient", PatientSchema);
-module.exports = Patient;
+module.exports = {
+    Patient
+};
