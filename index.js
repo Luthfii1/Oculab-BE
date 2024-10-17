@@ -138,25 +138,26 @@ app.post('/send-examination-data/:id', async (req, res) => {
 // });
 
 //Save (Post) fovdata system result by examinationId (after record) -> system grading & bacteria total count (FOVData - fase 1)
-app.post('/send-fov-data-system/:id', async (req, res) => {
+app.post('/send-fov-data-from-system/:id', async (req, res) => {
     try {
-        let { examinationId } = req.params;
+        let { id } = req.params;
         let dataFOV = req.body;
 
         console.log("data:", dataFOV);
 
-        if (examinationId == null) {
+        if (id == null) {
             res.status(404).json({
                 message: "Examination ID not found!"
             });
+
         }
 
-        const newFOVData = new FOVData(req.body.FOVData);
-        await newFOVData.save(); //save fovId (udah kegenerate)
+        // const newFOVData = new FOVData(req.body.FOVData);
+        // await newFOVData.save(); //save fovId (udah kegenerate)
 
         res.status(200).json({
             message: "FOV data received successfully",
-            data: newFOVData
+            data: dataFOV
         });
     } catch(error) {
         res.status(500).json({
@@ -454,6 +455,7 @@ app.get('/get-album', async (req, res) => {
 mongoose.connect(MONGO_URL)
 .then(() => {
     console.log("Hore keconnect dbnya :3");
+
 
     app.listen(PORT, () => {
         console.log(`servernya jalan di port ${PORT}: http://localhost:3000/`);
