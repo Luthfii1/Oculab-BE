@@ -443,57 +443,6 @@ app.get('/get-fov-data/:fovId', async (req, res) => {
     }
 })
 
-//Get Image Count based on FOVType by examinationId -> diitung len(arraynya) 
-//-> dimasukkin ke imageNumOf[FOVType] abis itu Post - DONE
-app.get('/get-image-count/:examinationId', async (req, res) => {
-    try {
-        let { examinationId } = req.params; // examinationId
-
-        let patient = await Patient.findOne({ 'resultExamination._id': examinationId });
-        console.log(patient)
-
-        if (!patient) {
-            return res.status(404).json({
-                message: "Examination ID not found!"
-            });
-        }
-
-        const examination = patient.resultExamination.find(
-            exam => exam._id.toString() === examinationId
-        );
-
-        if (!examination || !Array.isArray(examination.fov)) {
-            return res.status(404).json({
-                message: "FOV data not found in the specified examination!"
-            });
-        }
-
-        let imageNumOfBTA0 = 0;
-        let imageNumOfBTA1TO9 = 0;
-        let imageNumOfBTAABOVE9 = 0;
-
-        examination.fov.forEach(fov => {
-            if (fov.type === '0 BTA') {
-                imageNumOfBTA0++;
-            } else if (fov.type === '1-9 BTA') {
-                imageNumOfBTA1TO9++;
-            } else if (fov.type === '≥ 10 BTA') {
-                imageNumOfBTAABOVE9++;
-            }
-        });
-
-        res.status(200).json({
-            imageNumOfBTA0,
-            imageNumOfBTA1TO9,
-            imageNumOfBTAABOVE9
-        });
-    } catch(error) {
-        res.status(500).json({
-            message: error.message
-        });
-    }
-});
-
 //Get Submitted Examination by patientId -> ini setelahnya dibikin logic gaboleh diubah2 lagi
 // app.get('/get-submitted-examination/:id', async (req, res) => {
 //     try {
@@ -551,9 +500,9 @@ app.get('/get-image/:examinationId', async (req, res) => {
         let { examinationId } = req.params;
         let examination = await Examination.findById(examinationId);
 
-        let images = []
+        let examinationImages = []
         for (i in examination.fov) {
-            images.push(examination.fov[i].image)
+            examinationImages.push(examination.fov[i].image)
         }
 
         if (examination == null) {
@@ -562,7 +511,7 @@ app.get('/get-image/:examinationId', async (req, res) => {
             });
         }
 
-        res.status(200).json(images);
+        res.status(200).json({examinationImages});
     } catch(error){
         res.status(500).json({
             message: error.message
@@ -618,6 +567,51 @@ app.get('/get-image-album-by-fov-type/:examinationId', async (req, res) => {
     }
 });
 
+app.get('/get-result-description/:examinationId', async (req, res) => { 
+    try {
+        let { examinationId } = req.params;
+        let examination = await Examination.findById(examinationId);
+
+        if (!examination) {
+            return res.status(404).json({
+                message: "Examination not found!"
+            });
+        }
+
+        let resultDescription = {
+            'systemGrading': examination.systemGrading,
+            'count': 0
+        }
+
+        if (examination.systemGrading == "Scanty" || examination.systemGrading == "Positive 1+") {
+            resultDescription.count = examination.systemBacteriaTotalCount
+
+        } else {
+            let imageNumOfBTA1TO9 = 0;
+            let imageNumOfBTAABOVE9 = 0;
+
+            examination.fov.forEach(fov => {
+                if (fov.type === '1-9 BTA') {
+                    imageNumOfBTA1TO9++;
+                } else if (fov.type === '≥ 10 BTA') {
+                    imageNumOfBTAABOVE9++;
+                }
+            });
+            if (examination.systemGrading == "Positive 2+") {
+                resultDescription.count = imageNumOfBTA1TO9
+            } else if (examination.systemGrading == "Positive 3+") {
+                resultDescription.count = imageNumOfBTAABOVE9
+            }
+        }
+
+        res.status(200).json(resultDescription);
+    } catch(error){
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
+
 //Connect to MongoDB
 mongoose.connect(MONGO_URL)
 .then(() => {
@@ -631,3 +625,4 @@ mongoose.connect(MONGO_URL)
     console.log("Ga keconnect dah kocak");
     console.error("Connection Error: ", error.message);
 });
+
