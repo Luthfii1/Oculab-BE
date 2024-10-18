@@ -16,9 +16,28 @@ app.get('/', (req, res) => {
     res.send("Muncul yey");
 });
 
+//Get Patient by Id
+app.get('/patient/get-patient-by-id/:patientId', async (req, res) => {
+    try {
+        let { patientId } = req.params;
+        let patient = await Patient.findById(patientId);
 
-//Save (Post) all patient data - DONE
-app.post('/send-patient-data', async (req, res) => { 
+        if (patient == null) {
+            return res.status(404).json({
+                message: "Patient ID not found!"
+            });
+        }
+
+        res.status(200).json(patient);
+    } catch(error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
+
+//Create new patient
+app.post('/patient/create-new-patient', async (req, res) => { 
     try {
         let dataPatient = req.body.patient;
         console.log("patient:", dataPatient);
@@ -108,28 +127,21 @@ app.post('/send-patient-data', async (req, res) => {
     }
 });
 
-//Save (Post) initial examination data by patient Id (before record) 
- // (Examination - fase 1) - DONE
-app.post('/send-examination-data/:patientId', async (req, res) => {
+//Create Examination
+app.post('/examination/create-examination/:idPatient', async (req, res) => {
     try {
-        let { patientId  } = req.params; //patientId
-        let dataExamination = req.body.examination;
+        let { idPatient } = req.params; 
+        let dataExamination = req.body;
 
-        console.log("data:", dataExamination);
+        console.log("examination:", dataExamination);
 
-        if (!dataExamination) {
-            res.status(404).json({
-                message: "Examination data is empty!"
-            });
-        }
-
-        if (!patientId) { 
+        if (!idPatient) { 
             res.status(404).json({
                 message: "Patient ID not found!"
             })
         }
 
-        const patient = await Patient.findById(patientId);
+        const patient = await Patient.findById(idPatient);
         if (!patient) {
             return res.status(404).json({
                 message: "Patient not found!"
@@ -155,16 +167,142 @@ app.post('/send-examination-data/:patientId', async (req, res) => {
     }
 });
 
-// //Save (Post) examination data by Id (Video) to Analyze and Save Data (Examination - fase 2)
-// app.post('/video-sent', (req, res) => {
-//     //extract/forwarding video ke api ML rasyad (diterusin aja, gak disimpen)
-// });
-
-//Save (Post) fovdata system result by examinationId (after record) 
-//-> system grading & bacteria total count (FOVData - fase 1) - DONE
-app.post('/send-fov-data-from-system/:examinationId', async (req, res) => {
+// Post Final ML Analyze
+app.post('/examination/post-final-ml-analyze/:examinationId', async (req, res) => {
     try {
-        let { examinationId } = req.params; //examinationId
+        let { examinationId } = req.params;
+        const updatedData = req.body.examination;
+
+        let examination = await Examination.findById(
+            examinationId
+        );
+        if (!examination) {
+            return res.status(404).json({
+                message: "Examination not found!"
+            });
+        }
+
+        for (const [key, value] of Object.entries(updatedData)) {
+            if (key === 'confidenceLevelAggregated') {
+                examination[key] = mongoose.Types.Decimal128.fromString(value.toString());
+            } else {
+                examination[key] = value;
+            }
+        }
+
+        const patient = await Patient.findOne({ 'resultExamination._id': examinationId });
+        if (!patient) {
+            return res.status(404).json({ message: "Patient not found for this examination!" });
+        }
+
+        // update resultExamination with _id == examinationId using this function
+        await Patient.updateOne(
+            { 'resultExamination._id': examinationId },
+            {
+                $set: {
+                    'resultExamination.$': examination
+                }
+            }
+        );
+
+        await examination.save();
+
+        res.status(200).json({
+            message: "Examination updated successfully!",
+            data: examination,
+        });
+    } catch(error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
+
+// Get Examination Data
+app.get('/examination/get-examination-data/:examinationId', async (req, res) => {
+    try {
+        let { examinationId } = req.params; 
+
+        let patient = await Patient.findOne({ 'resultExamination._id': examinationId });
+        if (!patient) {
+            return res.status(404).json({
+                message: "Examination ID not found!"
+            });
+        }
+
+        const examination = patient.resultExamination.find(
+            exam => exam._id === examinationId
+        );
+
+        if (!examination) {
+            return res.status(404).json({
+                message: "Examination ID not found!"
+            });
+        }
+       
+        res.status(200).json(examination);
+    } catch(error){
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
+
+// Update Examination Result
+app.put('/examination/update-examination-result/:examinationId', async (req, res) => {
+    try {
+        let { examinationId } = req.params;
+        const updatedData = req.body.examination;
+
+        let examination = await Examination.findById(
+            examinationId
+        );
+        if (!examination) {
+            return res.status(404).json({
+                message: "Examination not found!"
+            });
+        }
+
+        for (const [key, value] of Object.entries(updatedData)) {
+            if (key === 'confidenceLevelAggregated') {
+                examination[key] = mongoose.Types.Decimal128.fromString(value.toString());
+            } else {
+                examination[key] = value;
+            }
+        }
+
+        const patient = await Patient.findOne({ 'resultExamination._id': examinationId });
+        if (!patient) {
+            return res.status(404).json({ message: "Patient not found for this examination!" });
+        }
+
+        // update resultExamination with _id == examinationId using this function
+        await Patient.updateOne(
+            { 'resultExamination._id': examinationId },
+            {
+                $set: {
+                    'resultExamination.$': examination
+                }
+            }
+        );
+
+        await examination.save();
+
+        res.status(200).json({
+            message: "Examination updated successfully!",
+            data: examination,
+        });
+    } catch(error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
+
+// Post FOV Data
+app.post('/fov/post-fov-data/:examinationId', async (req, res) => {
+    try {
+        let { examinationId } = req.params; 
         let dataFOV = req.body.FOVData;
 
         console.log("data:", dataFOV);
@@ -211,7 +349,14 @@ app.post('/send-fov-data-from-system/:examinationId', async (req, res) => {
     }
 });
 
-app.put('/update-patient-data/:patientId', async (req, res) => { // - DONE
+/* BATAS SUCI */
+
+// //Save (Post) examination data by Id (Video) to Analyze and Save Data (Examination - fase 2)
+// app.post('/video-sent', (req, res) => {
+//     //extract/forwarding video ke api ML rasyad (diterusin aja, gak disimpen)
+// });
+
+app.put('/update-patient-data/:id', async (req, res) => { // - DONE
     try {
         let { patientId } = req.params; //patientId
         let patient = await Patient.findByIdAndUpdate(patientId, req.body.patient);
@@ -234,6 +379,7 @@ app.put('/update-patient-data/:patientId', async (req, res) => { // - DONE
 });
 
 //TODO
+//!!
 //Save (Post by fovId) fovdata manual input by user (after system result is generated) 
 // (FOVData - fase 2)
 //msh gabener, di fovdata keupdate, di exam dan patient masih ver lama
@@ -311,18 +457,48 @@ app.put('/send-examination-data-ai/:id', async (req, res) => {
 
 //Save (Put/Update by examinationId) examination manual input (Examination - fase 4)
 // app.put('/send-examination-data-manual/:id', async (req, res) => {
+//ini telepatologi, masih out of scope sprint 2
+// app.post('/send-fov-data-manual/:id', async (req, res) => {
 //     try {
-//         let { examinationId } = req.params;
-//         let examination = await Examination.findByIdAndUpdate(examinationId, req.body);
+//         let { id } = req.params; //fovId
+//         let dataFOV = await FOVData.findByIdAndUpdate(id, req.body);
 
-//         if (examination == null) {
+//         console.log("data:", dataFOV);
+
+//         if (!dataFOV) {
 //             return res.status(404).json({
-//                 message: "Examination ID not found!"
+//                 message: "FOV ID not found!"
 //             });
 //         }
 
-//         const updatedExamination = await Examination.findById(examinationId);
-//         res.status(200).json(updatedExamination);
+//         const updatedExamination = await Examination.findOneAndUpdate(
+//             { 'fov._id': id }, // Find the examination containing this FOV
+//             { $set: { 'fov.$': dataFOV } }, // Update the specific FOV in the array
+//             { new: true }
+//         );
+
+//         if (!updatedExamination) {
+//             return res.status(404).json({
+//                 message: "Examination containing this FOV not found!"
+//             });
+//         }
+
+//         const updatedPatient = await Patient.findOneAndUpdate(
+//             { 'resultExamination._id': updatedExamination._id }, // Find the patient with the specific examination
+//             { $set: { 'resultExamination.$[elem].fov': updatedExamination.fov } },
+//             {
+//                 arrayFilters: [{ 'elem._id': updatedExamination._id }], // Array filter to target the correct examination
+//                 new: true
+//             }
+//         );
+
+//         if (!updatedPatient) {
+//             return res.status(404).json({
+//                 message: "Patient containing this Examination not found!"
+//             });
+//         }
+//         const updatedFOVData = await FOVData.findById(fovId);
+//         res.status(200).json(updatedFOVData);
 //     } catch(error) {
 //         res.status(500).json({
 //             message: error.message
@@ -330,35 +506,11 @@ app.put('/send-examination-data-ai/:id', async (req, res) => {
 //     }
 // });
 
-// //Update (Put) Examination Result -> di examination, 
-// app.put('/save-examination-result', (req, res) => {
-// })
-
 //Get all patient data - DONE
 app.get('/get-all-patient-data', async (req, res) => {
     try {
         let patients = await Patient.find().populate('resultExamination'); //cek populate perlu/ga
         res.status(200).json(patients);
-    } catch(error) {
-        res.status(500).json({
-            message: error.message
-        });
-    }
-});
-
-//Get a patient data by patientId - DONE
-app.get('/get-patient-data/:patientId', async (req, res) => {
-    try {
-        let { patientId } = req.params;
-        let patient = await Patient.findById(patientId);
-
-        if (patient == null) {
-            return res.status(404).json({
-                message: "Patient ID not found!"
-            });
-        }
-
-        res.status(200).json(patient);
     } catch(error) {
         res.status(500).json({
             message: error.message
@@ -382,40 +534,6 @@ app.get('/get-examination-data-by-patient-id/:patientId', async (req, res) => {
         const examination = patient.resultExamination;
         res.status(200).json(examination);
     } catch(error) {
-        res.status(500).json({
-            message: error.message
-        });
-    }
-});
-
-//!
-//Get Examination by examinationId -> ini data full examination
-//Get initial exam data by examinationId (Examination - fase 1)
-//Get examination ai result (by system) by examinationId (Examination - fase 2)
-//Get examination manual input by examinationId  (Examination - fase 3) - DONE
-app.get('/get-examination-data-by-examination-id/:examinationId', async (req, res) => {
-    try {
-        let { examinationId } = req.params; 
-
-        let patient = await Patient.findOne({ 'resultExamination._id': examinationId });
-        if (!patient) {
-            return res.status(404).json({
-                message: "Examination ID not found!"
-            });
-        }
-
-        const examination = patient.resultExamination.find(
-            exam => exam._id === examinationId
-        );
-
-        if (!examination) {
-            return res.status(404).json({
-                message: "Examination ID not found!"
-            });
-        }
-       
-        res.status(200).json(examination);
-    } catch(error){
         res.status(500).json({
             message: error.message
         });
@@ -519,7 +637,8 @@ app.get('/get-image/:examinationId', async (req, res) => {
     }
 });
 
-//Get Bacteria Photo Album by examinationId -> whole fov, disort berdasarkan FOVType (BTA0, BTA1TO9, BTAABOVE9)
+//Get Bacteria Photo Album by examinationId 
+//-> whole fov, disort berdasarkan FOVType (BTA0, BTA1TO9, BTAABOVE9)- DONE
 app.get('/get-image-album-by-fov-type/:examinationId', async (req, res) => {
     try {
         let { examinationId } = req.params;

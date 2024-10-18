@@ -55,10 +55,6 @@ const ExaminationSchema = new mongoose.Schema(
             default: Date.now()
         },
         fov: [FOVDataSchema],
-        // fov: {
-        //     type: [Schema.Types.ObjectId], 
-        //     ref: "FOVData"
-        // },
         systemGrading: { 
             type: String,
             enum: Object.values(GradingType),
