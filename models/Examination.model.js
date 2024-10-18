@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const { FOVDataSchema} = require('./FOVData.model.js'); 
+const {Schema} = mongoose;
+
 
 const ExamGoalType = Object.freeze({
     SCREENING: "SCREENING",
@@ -21,7 +23,7 @@ const GradingType = Object.freeze({
 
 const ExaminationSchema = new mongoose.Schema(
     {
-        id: {
+        _id: {
             type: String,
             required: true,
         },
@@ -39,12 +41,12 @@ const ExaminationSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        recordVideo: {
-            type: Buffer,
+        video: {
+            type: String,
             required: false,
         },
         wsi: {
-            type: Buffer,
+            type: String,
             required: false,
         },
         examinationDate: {

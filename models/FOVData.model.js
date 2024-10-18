@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 
 const FOVType = Object.freeze({
     BTA0: "0 BTA",
@@ -8,12 +9,13 @@ const FOVType = Object.freeze({
 
 const FOVDataSchema = new mongoose.Schema(
     {
-        id: {
+        _id: {
             type: String,
             required: true,
+            default: uuidv4
         },
         image: {
-            type: Buffer,
+            type: String,
             required: false,
         },
         type: {
