@@ -41,12 +41,12 @@ const ExaminationSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        recordVideo: {
-            type: Buffer,
+        video: {
+            type: String,
             required: false,
         },
         wsi: {
-            type: Buffer,
+            type: String,
             required: false,
         },
         examinationDate: {
