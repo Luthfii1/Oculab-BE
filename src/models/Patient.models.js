@@ -7,7 +7,7 @@ const SexType = Object.freeze({
 });
 
 const PatientSchema = new mongoose.Schema({
-  id: {
+  _id: {
     type: String,
     required: true,
   },
@@ -15,11 +15,11 @@ const PatientSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  nik: {
+  NIK: {
     type: String,
     required: true,
   },
-  dob: {
+  DoB: {
     type: Date,
     required: true,
   },
@@ -32,7 +32,7 @@ const PatientSchema = new mongoose.Schema({
     enum: Object.values(SexType),
     required: true,
   },
-  bpjs: {
+  BPJS: {
     type: String,
     required: false,
   },

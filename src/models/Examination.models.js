@@ -19,8 +19,13 @@ const GradingType = Object.freeze({
   Plus3: "Positive 3+",
 });
 
+const StatusExaminationType = Object.freeze({
+  INPROGRESS: "In Progress",
+  FINISHED: "Finished",
+});
+
 const ExaminationSchema = new mongoose.Schema({
-  id: {
+  _id: {
     type: String,
     required: true,
   },
@@ -42,8 +47,8 @@ const ExaminationSchema = new mongoose.Schema({
     type: Buffer,
     required: false,
   },
-  wsi: {
-    type: Buffer,
+  WSI: {
+    type: String,
     required: false,
   },
   examinationDate: {
@@ -52,6 +57,12 @@ const ExaminationSchema = new mongoose.Schema({
     default: Date.now(),
   },
   fov: [FOVDataSchema],
+  statusExamination: {
+    type: String,
+    required: true,
+    enum: StatusExaminationType,
+    default: StatusExaminationType.INPROGRESS,
+  },
   systemGrading: {
     type: String,
     enum: Object.values(GradingType),
@@ -76,10 +87,6 @@ const ExaminationSchema = new mongoose.Schema({
   },
   notes: {
     type: String,
-    required: false,
-  },
-  gradingDescriptionFOVCount: {
-    type: Number,
     required: false,
   },
 });
