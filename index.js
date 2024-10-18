@@ -2,16 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 const PORT = 3000;
-const DIRECT_MONGO_URL = "mongodb://aioculab:abipapiuncle@cluster-shard-00-00.mongodb.net:27017,cluster-shard-00-01.mongodb.net:27017,cluster-shard-00-02.mongodb.net:27017/be-api?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority";
-
 const MONGO_URL = "mongodb+srv://aioculab:abipapiuncle@oculab-db.r6h3s.mongodb.net/be-api?retryWrites=true&w=majority&appName=oculab-db"
-
-// const MONGO_URL = "mongodb+srv://aioculab:abipapiuncle@oculab-db.mongodb.net/be-api?retryWrites=true&w=majority";
 
 const { Patient } = require('./models/patient.model.js');
 const { Examination } = require('./models/examination.model.js');
 const { FOVData } = require('./models/FOVData.model.js');
-// const { reset } = require('nodemon');
 
 const app = express();
 
@@ -113,7 +108,7 @@ app.post('/send-patient-data', async (req, res) => {
 });
 
 //Save (Post) initial examination data by patient Id (before record) 
-// (Examination - fase 1) - DONE
+ // (Examination - fase 1) - DONE
 app.post('/send-examination-data/:id', async (req, res) => {
     try {
         let { id  } = req.params; //patientId
@@ -395,22 +390,20 @@ app.get('/get-examination-data-by-patient-id/:id', async (req, res) => {
 //Get Examination by examinationId -> ini data full examination
 //Get initial exam data by examinationId (Examination - fase 1)
 //Get examination ai result (by system) by examinationId (Examination - fase 2)
-//Get examination manual input by examinationId  (Examination - fase 3)
+//Get examination manual input by examinationId  (Examination - fase 3) - DONE
 app.get('/get-examination-data-by-examination-id/:id', async (req, res) => {
     try {
-        let { id } = req.params; //examinationId
-        // let examination = await Examination.findById(id);
+        let { id } = req.params; 
 
-        let patient = await Patient.findOne({ 'resultExamination.id': id });
+        let patient = await Patient.findOne({ 'resultExamination._id': id });
         if (!patient) {
             return res.status(404).json({
                 message: "Examination ID not found!"
             });
         }
 
-        // Temukan examination yang sesuai di array resultExamination berdasarkan properti "id"
         const examination = patient.resultExamination.find(
-            exam => exam.id === id
+            exam => exam._id === id
         );
 
         if (!examination) {
@@ -447,22 +440,41 @@ app.get('/get-fov-data/:id', async (req, res) => {
     }
 })
 
-//Get Image Count based on FOVType by examinationId -> diitung len(arraynya) -> dimasukkin ke imageNumOf[FOVType] abis itu Post
-app.get('/get-image-count/:id', async (req, res) => {
+//Get Image Count based on FOVType by examinationId -> diitung len(arraynya) 
+//-> dimasukkin ke imageNumOf[FOVType] abis itu Post - DONE
+app.get('/get-image-count/:examinationId', async (req, res) => {
     try {
-        let { examinationId } = req.params;
-        let fovData = await FOVData.findById(examinationId);
+        let { examinationId } = req.params; // examinationId
+
+        let patient = await Patient.findOne({ 'resultExamination._id': examinationId });
+        console.log(patient)
+
+        if (!patient) {
+            return res.status(404).json({
+                message: "Examination ID not found!"
+            });
+        }
+
+        const examination = patient.resultExamination.find(
+            exam => exam._id.toString() === id
+        );
+
+        if (!examination || !Array.isArray(examination.fov)) {
+            return res.status(404).json({
+                message: "FOV data not found in the specified examination!"
+            });
+        }
 
         let imageNumOfBTA0 = 0;
         let imageNumOfBTA1TO9 = 0;
         let imageNumOfBTAABOVE9 = 0;
 
-        fovData.forEach(fov => {
-            if (fov.type == 'BTA0') {
+        examination.fov.forEach(fov => {
+            if (fov.type === '0 BTA') {
                 imageNumOfBTA0++;
-            } else if (fov.type == 'BTA1TO9') {
+            } else if (fov.type === '1-9 BTA') {
                 imageNumOfBTA1TO9++;
-            } else if (fov.type == 'BTAABOVE9') {
+            } else if (fov.type === '≥ 10 BTA') {
                 imageNumOfBTAABOVE9++;
             }
         });
@@ -510,7 +522,7 @@ app.get('/get-image-count/:id', async (req, res) => {
 // });
 
 //Get Photo from FOVId -> image di fovdata
-app.get('/get-photo/:id', async (req, res) => {
+app.get('/get-image/:id', async (req, res) => {
     try {
         let { id } = req.params;
         let fovData = await FOVData.findById(id);
@@ -531,14 +543,46 @@ app.get('/get-photo/:id', async (req, res) => {
 });
 
 //Get Bacteria Photo Album by examinationId -> whole fov, disort berdasarkan FOVType (BTA0, BTA1TO9, BTAABOVE9)
-app.get('/get-album', async (req, res) => {
+app.get('/get-image-album-by-fov-type/:examinationId', async (req, res) => {
     try {
-        let { id } = req.params;
-        let fovData = await FOVData.findById(id);
+        let { examinationId } = req.params;
 
-        //logic untuk sort berd. fovtype
+        let patient = await Patient.findOne({ 'resultExaminaton._id': examinationId});
+        console.log(patient)
+        console.log(Patient.findOne({ 'resultExaminaton._id': examinationId}))
+        if(!patient) {
+            return res.status(404).json({
+                message: "Examination ID not found!"
+            });
+        }
 
-        res.status(200).json();
+        const examination = patient.resultExamination.find(
+            exam => exam._id.toString() === examinationId
+        );
+
+        if (!examination || !Array.isArray(examination.fov)) {
+            return res.status(404).json({
+                message: "FOV Data not found!"
+            });
+        }
+
+        let fovGroupedByType = {
+            '0 BTA': [],
+            '1-9 BTA': [],
+            '≥ 10 BTA': []
+        };
+
+        examination.fov.forEach(fov => {
+            if (fov.type == '0 BTA') {
+                fovGroupedByType['0 BTA'].push(fov);
+            } else if (fov.type == '1-9 BTA') {
+                fovGroupedByType['1-9 BTA'].push(fov);
+            } else if (fov.type == '≥ 10 BTA') {
+                fovGroupedByType['≥ 10 BTA'].push(fov);
+            }
+        });
+
+        res.status(200).json(fovGroupedByType);
     } catch(error) {
         res.status(500).json({
             message: error.message
