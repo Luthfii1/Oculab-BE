@@ -398,19 +398,17 @@ app.get('/get-examination-data-by-patient-id/:id', async (req, res) => {
 //Get examination manual input by examinationId  (Examination - fase 3)
 app.get('/get-examination-data-by-examination-id/:id', async (req, res) => {
     try {
-        let { id } = req.params; //examinationId
-        // let examination = await Examination.findById(id);
+        let { id } = req.params; 
 
-        let patient = await Patient.findOne({ 'resultExamination.id': id });
+        let patient = await Patient.findOne({ 'resultExamination._id': id });
         if (!patient) {
             return res.status(404).json({
                 message: "Examination ID not found!"
             });
         }
 
-        // Temukan examination yang sesuai di array resultExamination berdasarkan properti "id"
         const examination = patient.resultExamination.find(
-            exam => exam.id === id
+            exam => exam._id === id
         );
 
         if (!examination) {
@@ -427,11 +425,12 @@ app.get('/get-examination-data-by-examination-id/:id', async (req, res) => {
     }
 });
 
-//Get fovdata system result (after record) by fovId (FOVData)
-app.get('/get-fov-data/:id', async (req, res) => {
+//Get fovdata system result (after record) by fovId (FOVData) - DONE
+app.get('/get-fov-data/:fovId', async (req, res) => {
     try {
         let { fovId } = req.params;
         let fovData = await FOVData.findById(fovId);
+        
 
         if (fovData == null) {
             return res.status(404).json({
@@ -510,19 +509,44 @@ app.get('/get-image-count/:id', async (req, res) => {
 // });
 
 //Get Photo from FOVId -> image di fovdata
-app.get('/get-photo/:id', async (req, res) => {
-    try {
-        let { id } = req.params;
-        let fovData = await FOVData.findById(id);
+// app.get('/get-image/:fovId', async (req, res) => {
+//     try {
+//         let { fovId } = req.params;
+//         let fovData = await FOVData.findById(fovId);
+//         console.log(fovData)
 
-        if (fovData == null || fovData.image == null) {
+//         if (fovData == null || fovData.image == null) {
+//             return res.status(404).json({
+//                 message: "Image not found!"
+//             });
+//         }
+
+//         res.status(200).json(fovData.image);
+//     } catch(error){
+//         res.status(500).json({
+//             message: error.message
+//         });
+//     }
+// });
+
+// DONE
+app.get('/get-image/:examinationId', async (req, res) => { 
+    try {
+        let { examinationId } = req.params;
+        let examination = await Examination.findById(examinationId);
+
+        let images = []
+        for (i in examination.fov) {
+            images.push(examination.fov[i].image) //TODO: nanti images kalo ada
+        }
+
+        if (examination == null) {
             return res.status(404).json({
-                message: "Image not found!"
+                message: "Examination not found!"
             });
         }
 
-        res.contentType('image/png'); //ini tergantung image typenya
-        res.status(200).json(fovData.image);
+        res.status(200).json(images);
     } catch(error){
         res.status(500).json({
             message: error.message
