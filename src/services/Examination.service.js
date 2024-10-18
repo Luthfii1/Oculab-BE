@@ -1,15 +1,15 @@
 const { Examination } = require("../models/Examination.models");
 const { Patient } = require("../models/Patient.models");
 
-exports.newInputExamination = async function (params, body) {
-  const { examination } = body;
-  if (!examination) {
-    throw new Error("Examination data is required");
-  }
-
+exports.createExamination = async function (params, body) {
   const patientId = params.patientId;
   if (!patientId) {
     throw new Error("Patient ID is required");
+  }
+
+  const { examination } = body;
+  if (!examination) {
+    throw new Error("Examination data is required");
   }
 
   const patient = await Patient.findById(patientId);

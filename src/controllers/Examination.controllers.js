@@ -1,8 +1,8 @@
 const ExaminationService = require("../services/Examination.service");
 
-exports.newInputExamination = async function (req, res) {
+exports.createExamination = async function (req, res) {
   try {
-    const result = await ExaminationService.newInputExamination(
+    const result = await ExaminationService.createExamination(
       req.params,
       req.body
     );
