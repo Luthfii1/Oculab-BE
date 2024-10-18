@@ -16,6 +16,7 @@ app.get('/', (req, res) => {
     res.send("Muncul yey");
 });
 
+
 //Save (Post) all patient data - DONE
 app.post('/send-patient-data', async (req, res) => { 
     try {
@@ -109,9 +110,9 @@ app.post('/send-patient-data', async (req, res) => {
 
 //Save (Post) initial examination data by patient Id (before record) 
  // (Examination - fase 1) - DONE
-app.post('/send-examination-data/:id', async (req, res) => {
+app.post('/send-examination-data/:patientId', async (req, res) => {
     try {
-        let { id  } = req.params; //patientId
+        let { patientId  } = req.params; //patientId
         let dataExamination = req.body.examination;
 
         console.log("data:", dataExamination);
@@ -122,13 +123,13 @@ app.post('/send-examination-data/:id', async (req, res) => {
             });
         }
 
-        if (!id) { 
+        if (!patientId) { 
             res.status(404).json({
                 message: "Patient ID not found!"
             })
         }
 
-        const patient = await Patient.findById(id);
+        const patient = await Patient.findById(patientId);
         if (!patient) {
             return res.status(404).json({
                 message: "Patient not found!"
@@ -161,14 +162,14 @@ app.post('/send-examination-data/:id', async (req, res) => {
 
 //Save (Post) fovdata system result by examinationId (after record) 
 //-> system grading & bacteria total count (FOVData - fase 1) - DONE
-app.post('/send-fov-data-from-system/:id', async (req, res) => {
+app.post('/send-fov-data-from-system/:examinationId', async (req, res) => {
     try {
-        let { id } = req.params; //examinationId
+        let { examinationId } = req.params; //examinationId
         let dataFOV = req.body.FOVData;
 
         console.log("data:", dataFOV);
 
-        if (!id) {
+        if (!examinationId) {
             res.status(404).json({
                 message: "Examination ID not found!"
             });
@@ -179,7 +180,7 @@ app.post('/send-fov-data-from-system/:id', async (req, res) => {
             })
         }
 
-        const examination = await Examination.findById(id);
+        const examination = await Examination.findById(examinationId);
         if (!examination) {
             res.status(404).json({
                 message: "Examination not found!"
@@ -210,10 +211,10 @@ app.post('/send-fov-data-from-system/:id', async (req, res) => {
     }
 });
 
-app.put('/update-patient-data/:id', async (req, res) => { // - DONE
+app.put('/update-patient-data/:patientId', async (req, res) => { // - DONE
     try {
-        let { id } = req.params; //patientId
-        let patient = await Patient.findByIdAndUpdate(id, req.body.patient);
+        let { patientId } = req.params; //patientId
+        let patient = await Patient.findByIdAndUpdate(patientId, req.body.patient);
 
         console.log("data:", patient);
 
@@ -223,7 +224,7 @@ app.put('/update-patient-data/:id', async (req, res) => { // - DONE
             });
         }
 
-        const updatedPatientData = await Patient.findById(id);
+        const updatedPatientData = await Patient.findById(patientId);
         res.status(200).json(updatedPatientData);
     } catch(error) {
         res.status(500).json({
@@ -232,7 +233,7 @@ app.put('/update-patient-data/:id', async (req, res) => { // - DONE
     }
 });
 
-//!
+//TODO
 //Save (Post by fovId) fovdata manual input by user (after system result is generated) 
 // (FOVData - fase 2)
 //msh gabener, di fovdata keupdate, di exam dan patient masih ver lama
@@ -285,6 +286,7 @@ app.post('/send-fov-data-manual/:id', async (req, res) => {
     }
 });
 
+//TODO
 //Save (Put/Update by examinationId) examination ai result (by system) (Examination - fase 3)
 //Save (Put/Update by examinationId) examination manual input (Examination - fase 4)
 app.put('/send-examination-data-ai/:id', async (req, res) => {
@@ -345,10 +347,10 @@ app.get('/get-all-patient-data', async (req, res) => {
 });
 
 //Get a patient data by patientId - DONE
-app.get('/get-patient-data/:id', async (req, res) => {
+app.get('/get-patient-data/:patientId', async (req, res) => {
     try {
-        let { id } = req.params;
-        let patient = await Patient.findById(id);
+        let { patientId } = req.params;
+        let patient = await Patient.findById(patientId);
 
         if (patient == null) {
             return res.status(404).json({
@@ -365,11 +367,11 @@ app.get('/get-patient-data/:id', async (req, res) => {
 });
 
 //Get Examination by patientId -> ini data full examination per pasien - DONE
-app.get('/get-examination-data-by-patient-id/:id', async (req, res) => {
+app.get('/get-examination-data-by-patient-id/:patientId', async (req, res) => {
     try {
-        let { id } = req.params; //patientId
+        let { patientId } = req.params; //patientId
 
-        let patient = await Patient.findById(id).populate('resultExamination');
+        let patient = await Patient.findById(patientId).populate('resultExamination');
 
         if (!patient || !patient.resultExamination || patient.resultExamination.length === 0) {
             return res.status(404).json({
@@ -391,11 +393,11 @@ app.get('/get-examination-data-by-patient-id/:id', async (req, res) => {
 //Get initial exam data by examinationId (Examination - fase 1)
 //Get examination ai result (by system) by examinationId (Examination - fase 2)
 //Get examination manual input by examinationId  (Examination - fase 3) - DONE
-app.get('/get-examination-data-by-examination-id/:id', async (req, res) => {
+app.get('/get-examination-data-by-examination-id/:examinationId', async (req, res) => {
     try {
-        let { id } = req.params; 
+        let { examinationId } = req.params; 
 
-        let patient = await Patient.findOne({ 'resultExamination._id': id });
+        let patient = await Patient.findOne({ 'resultExamination._id': examinationId });
         if (!patient) {
             return res.status(404).json({
                 message: "Examination ID not found!"
@@ -403,7 +405,7 @@ app.get('/get-examination-data-by-examination-id/:id', async (req, res) => {
         }
 
         const examination = patient.resultExamination.find(
-            exam => exam._id === id
+            exam => exam._id === examinationId
         );
 
         if (!examination) {
@@ -551,7 +553,7 @@ app.get('/get-image/:examinationId', async (req, res) => {
 
         let images = []
         for (i in examination.fov) {
-            images.push(examination.fov[i].image) //TODO: nanti images kalo ada
+            images.push(examination.fov[i].image)
         }
 
         if (examination == null) {
