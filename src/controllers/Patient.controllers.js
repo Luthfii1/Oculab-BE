@@ -1,8 +1,8 @@
 const patientServices = require("../services/Patient.services");
 
-exports.newInputPatient = async function (req, res) {
+exports.createNewPatient = async function (req, res) {
   try {
-    const result = await patientServices.newInputPatient(req.body);
+    const result = await patientServices.createNewPatient(req.body);
     res.status(200).send(result);
   } catch (error) {
     res.status(500).send({ message: error.message });

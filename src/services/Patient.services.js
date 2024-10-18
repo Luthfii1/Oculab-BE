@@ -3,7 +3,7 @@ const { Patient } = require("../models/Patient.models");
 const { FOVData } = require("../models/FOVData.models");
 const { Examination } = require("../models/Examination.models");
 
-exports.newInputPatient = async function (body) {
+exports.createNewPatient = async function (body) {
   const { patient } = body;
   if (!patient) {
     throw new Error("Patient data is required");
@@ -20,7 +20,7 @@ exports.newInputPatient = async function (body) {
 
   try {
     let savedExaminations = [];
-    let savedFOVs = []; 
+    let savedFOVs = [];
 
     if (patient.resultExamination) {
       for (const examination of patient.resultExamination) {
@@ -53,13 +53,13 @@ exports.newInputPatient = async function (body) {
 
             const newFOVData = new FOVData(fov);
             fovForCurrentExam.push(newFOVData);
-            savedFOVs.push(newFOVData); 
+            savedFOVs.push(newFOVData);
           }
         } else {
           throw new Error("FOVData must be an array");
         }
 
-        examination.fov = fovForCurrentExam; 
+        examination.fov = fovForCurrentExam;
 
         const newExamination = new Examination(examination);
         savedExaminations.push(newExamination);
@@ -87,7 +87,7 @@ exports.newInputPatient = async function (body) {
     // Abort transaction if something goes wrong
     await session.abortTransaction();
     session.endSession();
-    throw error; 
+    throw error;
   }
 };
 
