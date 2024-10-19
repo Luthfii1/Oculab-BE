@@ -112,5 +112,17 @@ exports.getPatientById = async function (params) {
     throw new Error("Patient not found");
   }
 
-  return patient;
+  const patientWithoutResultExamination = patient.toObject();
+  delete patientWithoutResultExamination.resultExamination;
+
+  // change the _id into patientId
+  patientWithoutResultExamination.patientId =
+    patientWithoutResultExamination._id;
+  delete patientWithoutResultExamination._id;
+  delete patientWithoutResultExamination.__v;
+
+  return {
+    message: "Patient data received successfully",
+    data: patientWithoutResultExamination,
+  };
 };
