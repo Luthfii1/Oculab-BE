@@ -18,5 +18,9 @@ router.get(
   "/get-examination-by-id/:examinationId",
   examinationControllers.getExaminationById
 );
+router.get(
+  "/get-number-of-examinations",
+  examinationControllers.getNumberOfExaminations
+);
 
 module.exports = router;
