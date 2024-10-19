@@ -1,5 +1,7 @@
+const { request } = require("express");
 const { Examination } = require("../models/Examination.models");
 const { Patient } = require("../models/Patient.models");
+const { URL_EXPORT_VIDEO } = require("../../constants");
 
 exports.createExamination = async function (params, body) {
   const patientId = params.patientId;
@@ -151,3 +153,59 @@ exports.getNumberOfExaminations = async function () {
     data: numberOfExaminations,
   };
 };
+
+// service for post system diagnosis from examination id using video in multipart form request with body of video and send the video to other backend model server in URL/export-video/examinationId:
+exports.postSystemDiagnosis = async function (params, body) {
+  const { examinationId } = params;
+  if (!examinationId) {
+    throw new Error("Examination ID is required");
+  }
+
+  const examination = await Examination.findById(examinationId);
+  if (!examination) {
+    throw new Error("Examination not found");
+  }
+
+  // send the video to other backend model server in URL/export-video/examinationId
+  // and get the system diagnosis result
+
+  const sendVideoToOtherModelServer = async function (examinationId, video) { 
+    // send the video to other backend model server in URL/export-video/examinationId
+    // and get the system diagnosis result
+    // return the result of system diagnosis
+    request.post(
+      {
+        url: `URL_EXPORT_VIDEO/${examinationId}`,
+        formData: {
+          video: {
+            value: video,
+          },
+        },
+      },
+      function (error, response, body) {
+        if (error) {
+          throw new Error("Failed to send video to other model server");
+        }
+
+        return body;
+      }
+    )
+    return {
+      message: "System diagnosis received successfully",
+      data: systemDiagnosisResult,
+    };
+  }
+
+  const systemDiagnosisResult = await sendVideoToOtherModelServer(
+    examinationId,
+    body.video
+  );
+
+  
+
+  // return the result of system diagnosis
+  return {
+    message: "System diagnosis received successfully",
+    data: systemDiagnosisResult,
+  };
+}
