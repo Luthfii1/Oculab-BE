@@ -1,5 +1,12 @@
 const { Examination } = require("../models/Examination.models");
 const { Patient } = require("../models/Patient.models");
+const fs = require("fs");
+const FormData = require("form-data");
+const dotenv = require("dotenv");
+const fetch = (...args) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
+
+dotenv.config();
 
 exports.createExamination = async function (params, body) {
   const patientId = params.patientId;
@@ -131,12 +138,9 @@ exports.getExaminationById = async function (params) {
 };
 
 exports.getNumberOfExaminations = async function () {
-  // get totalnegative by count all examination with finalGrading == enum negative of GradingType
   const totalNegative = await Examination.countDocuments({
     finalGrading: "NEGATIVE",
   });
-
-  // get totalpositive by count all examination with finalGrading == except enum negative of GradingType
   const totalPositive = await Examination.countDocuments({
     finalGrading: { $ne: "NEGATIVE" },
   });
@@ -149,5 +153,106 @@ exports.getNumberOfExaminations = async function () {
   return {
     message: "Number of examinations received successfully",
     data: numberOfExaminations,
+  };
+};
+
+exports.forwardVideoToML = async function (file, params) {
+  const { examinationId } = params;
+  if (!examinationId) {
+    throw new Error("Examination ID is required");
+  }
+
+  const videoFilePath = file.path;
+
+  try {
+    // Check if the video file exists
+    if (!fs.existsSync(videoFilePath)) {
+      throw new Error("Video file is required");
+    }
+
+    // Check if examinationId exists
+    const examination = await Examination.findById(examinationId);
+    if (!examination) {
+      throw new Error("We can't find the examination");
+    }
+
+    const url = process.env.DOMAIN_ML + "/" + examinationId;
+    const formData = new FormData();
+
+    // Append the video file with the correct key
+    formData.append("video", fs.createReadStream(videoFilePath), {
+      filename: file.originalname,
+      contentType: file.mimetype,
+    });
+
+    // Send the video to the machine learning service
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Error response body:", errorText);
+      throw new Error(`Failed to forward video to ML service: ${errorText}`);
+    }
+
+    const result = await response.json();
+
+    // Remove the temporary video file
+    fs.unlink(videoFilePath, (err) => {
+      if (err) {
+        console.error(`Failed to remove temporary file: ${err}`);
+      } else {
+        console.log(`Temporary file ${videoFilePath} has been removed.`);
+      }
+    });
+
+    return {
+      message: "Video forwarded to ML service successfully",
+      data: result,
+    };
+  } catch (error) {
+    console.error("Error occurred:", error);
+
+    // Attempt to remove the temporary file even if an error occurred
+    if (videoFilePath) {
+      fs.unlink(videoFilePath, (err) => {
+        if (err) {
+          console.error("Failed to remove temporary file:", err);
+        } else {
+          console.log(
+            `Temporary file ${videoFilePath} has been removed after error.`
+          );
+        }
+      });
+    }
+
+    throw error;
+  }
+};
+
+exports.testing = async function (body) {
+  const url = "https://oculab-be.vercel.app/patient/create-new-patient";
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Error response body:", errorText);
+    throw new Error(`Failed to forward video to ML service: ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  return {
+    message: "Testing successful",
+    data: data,
   };
 };
