@@ -10,5 +10,9 @@ router.get(
   "/get-examinations-by-user/:patientId",
   examinationControllers.getExaminationsByUser
 );
+router.post(
+  "/post-final-ml-analyze/:patientId/:examinationId",
+  examinationControllers.postFinalMLAnalyze
+);
 
 module.exports = router;

@@ -44,3 +44,47 @@ exports.getExaminationsByUser = async function (params) {
     data: patient.resultExamination,
   };
 };
+
+exports.postFinalMLAnalyze = async function (params, body) {
+  const { patientId, examinationId } = params;
+  if (!examinationId || !patientId) {
+    throw new Error("Patient ID or Examination ID are required");
+  }
+
+  const { examination } = body;
+  if (!examination) {
+    throw new Error("Examination data is required");
+  }
+
+  const patient = await Patient.findById(patientId);
+  if (!patient) {
+    throw new Error("Patient not found");
+  }
+
+  const examinationToUpdate = await Examination.findById(examinationId);
+  if (!examinationToUpdate) {
+    throw new Error("Examination not found");
+  }
+
+  // update the examination data with the updated data
+  for (const [key, value] of Object.entries(examination)) {
+    examinationToUpdate[key] = value;
+  }
+
+  await examinationToUpdate.save();
+
+  // update the patient data with the updated examination data by examinationId and patientId
+  await Patient.updateOne(
+    { _id: patientId, "resultExamination._id": examinationId },
+    {
+      $set: {
+        "resultExamination.$": examinationToUpdate,
+      },
+    }
+  );
+
+  return {
+    message: "Successfully to updated the examination data",
+    data: patient.resultExamination,
+  };
+};

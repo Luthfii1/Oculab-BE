@@ -20,3 +20,15 @@ exports.getExaminationsByUser = async function (req, res) {
     res.status(500).send({ message: error.message });
   }
 };
+
+exports.postFinalMLAnalyze = async function (req, res) {
+  try {
+    const result = await ExaminationService.postFinalMLAnalyze(
+      req.params,
+      req.body
+    );
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};

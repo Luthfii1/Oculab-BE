@@ -69,7 +69,7 @@ const ExaminationSchema = new mongoose.Schema({
     required: false,
   },
   confidenceLevelAggregated: {
-    type: mongoose.Decimal128,
+    type: Number,
     required: false,
   },
   finalGrading: {
