@@ -88,3 +88,20 @@ exports.postFinalMLAnalyze = async function (params, body) {
     data: patient.resultExamination,
   };
 };
+
+exports.getExaminationById = async function (params) {
+  const { examinationId } = params;
+  if (!examinationId) {
+    throw new Error("Examination ID is required");
+  }
+
+  const examination = await Examination.findById(examinationId);
+  if (!examination) {
+    throw new Error("Examination not found");
+  }
+
+  return {
+    message: "Examination data received successfully",
+    data: examination,
+  };
+};
