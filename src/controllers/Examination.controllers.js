@@ -21,9 +21,9 @@ exports.getExaminationsByUser = async function (req, res) {
   }
 };
 
-exports.postFinalMLAnalyze = async function (req, res) {
+exports.updateExaminationResult = async function (req, res) {
   try {
-    const result = await ExaminationService.postFinalMLAnalyze(
+    const result = await ExaminationService.updateExaminationResult(
       req.params,
       req.body
     );

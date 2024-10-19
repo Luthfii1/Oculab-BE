@@ -9,6 +9,7 @@ const app = express();
 const { getHomePage } = require("./src/utils/LandingPage");
 const patientRoutes = require("./src/routes/Patient.routes");
 const examinationRoutes = require("./src/routes/Examination.routes");
+const fovRoutes = require("./src/routes/Fov.routes");
 
 // Set up the server
 dotenv.config();
@@ -27,6 +28,7 @@ app.use(
 app.get("/", getHomePage);
 app.use("/patient", patientRoutes);
 app.use("/examination", examinationRoutes);
+app.use("/fov", fovRoutes);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

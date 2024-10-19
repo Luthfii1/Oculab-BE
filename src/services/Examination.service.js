@@ -45,7 +45,7 @@ exports.getExaminationsByUser = async function (params) {
   };
 };
 
-exports.postFinalMLAnalyze = async function (params, body) {
+exports.updateExaminationResult = async function (params, body) {
   const { patientId, examinationId } = params;
   if (!examinationId || !patientId) {
     throw new Error("Patient ID or Examination ID are required");

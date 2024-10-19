@@ -11,8 +11,8 @@ router.get(
   examinationControllers.getExaminationsByUser
 );
 router.post(
-  "/post-final-ml-analyze/:patientId/:examinationId",
-  examinationControllers.postFinalMLAnalyze
+  "/update-examination-result/:patientId/:examinationId",
+  examinationControllers.updateExaminationResult
 );
 router.get(
   "/get-examination-by-id/:examinationId",
