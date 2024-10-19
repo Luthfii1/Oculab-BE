@@ -1,0 +1,52 @@
+// Will be deleted later
+//Save (Post) initial examination data (before record) (Examination - fase 1)
+
+//Save (Post) Video to Analyze and Save Data (Examination - fase 2)
+app.post("/video-sent", (req, res) => {});
+
+//Save (Post) fovdata system result (after record) -> system grading & bacteria total count (FOVData - fase 1)
+
+//Save (Put/Update by fovId) fovdata manual input by user (after system result is generated) (FOVData - fase 2)
+
+//Save (Put/Update by examinationId) examination ai result (by system) (Examination - fase 3)
+
+//Save (Put/Update by examinationId) examination manual input (Examination - fase 4)
+
+// //Update (Put) Examination Result -> di examination,
+// app.put('/save-examination-result', (req, res) => {
+// })
+
+//Get initial exam data by examinationId (Examination - fase 1)
+
+//Get fovdata system result (after record) by fovId (FOVData)
+
+//Get examination ai result (by system) by examinationId (Examination - fase 2)
+
+//Get examination manual input by examinationId  (Examination - fase 3)
+
+//Get number of gambar berd. FOVType (0, 1-9, >= 10) -> diitung len(arraynya) -> dimasukkin ke imageNumOf[FOVType] abis itu Post
+
+//Get Submitted Examination -> ini setelahnya dibikin logic gaboleh diubah2 lagi
+app.get("/get-submitted-examination", async (req, res) => {
+  try {
+    const examination = await Examination.find(req.body).populate("fov");
+
+    res.status(200).json(examination);
+  } catch (error) {
+    res.status(500).message({
+      message: error.message,
+    });
+  }
+});
+
+//Get Photo from FOVId -> image di fovdata
+app.get("/get-photo/:id", (req, res) => {
+  try {
+  } catch (error) {}
+});
+
+//Get Bacteria Photo Album -> whole fov, disort berdasarkan FOVType (BTA0, BTA1TO9, BTAABOVE9)
+app.get("/get-album", (req, res) => {
+  try {
+  } catch (error) {}
+});
