@@ -126,3 +126,33 @@ exports.getPatientById = async function (params) {
     data: patientWithoutResultExamination,
   };
 };
+
+exports.getAllPatientsByName = async function (params) {
+  const { patientName } = params;
+  if (!patientName) {
+    throw new Error("Patient name is required");
+  }
+
+  // make the search case insensitive
+  const patients = await Patient.find({
+    name: { $regex: new RegExp(patientName, "i") },
+  });
+
+  // Convert each patient document to a plain JavaScript object and modify it
+  const patientsResponse = patients.map((patient) => {
+    const patientObj = patient.toObject();
+
+    // Replace the _id with patientId
+    patientObj.patientId = patientObj._id;
+    delete patientObj._id;
+    delete patientObj.resultExamination;
+    delete patientObj.__v;
+
+    return patientObj;
+  });
+
+  return {
+    message: "Patient data received successfully",
+    data: patientsResponse,
+  };
+};
