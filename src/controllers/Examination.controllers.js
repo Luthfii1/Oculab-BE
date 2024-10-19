@@ -41,3 +41,12 @@ exports.getExaminationById = async function (req, res) {
     res.status(500).send({ message: error.message });
   }
 };
+
+exports.getNumberOfExaminations = async function (req, res) {
+  try {
+    const result = await ExaminationService.getNumberOfExaminations();
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};

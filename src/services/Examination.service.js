@@ -105,3 +105,25 @@ exports.getExaminationById = async function (params) {
     data: examination,
   };
 };
+
+exports.getNumberOfExaminations = async function () {
+  // get totalnegative by count all examination with finalGrading == enum negative of GradingType
+  const totalNegative = await Examination.countDocuments({
+    finalGrading: "NEGATIVE",
+  });
+
+  // get totalpositive by count all examination with finalGrading == except enum negative of GradingType
+  const totalPositive = await Examination.countDocuments({
+    finalGrading: { $ne: "NEGATIVE" },
+  });
+
+  const numberOfExaminations = {
+    numberOfPositive: totalPositive,
+    numberOfNegative: totalNegative,
+  };
+
+  return {
+    message: "Number of examinations received successfully",
+    data: numberOfExaminations,
+  };
+};
