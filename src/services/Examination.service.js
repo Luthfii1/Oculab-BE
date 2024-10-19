@@ -100,9 +100,33 @@ exports.getExaminationById = async function (params) {
     throw new Error("Examination not found");
   }
 
+  const examinationResponse = examination.toObject();
+  // Replace _id with examinationId
+  examinationResponse.examinationId = examination._id;
+  delete examinationResponse._id;
+  delete examinationResponse.__v;
+
+  // Add image preview from the first FOV image
+  if (examinationResponse.fov.length > 0) {
+    examinationResponse.imagePreview = examinationResponse.fov[0].image;
+
+    // Replace _id with fovDataId in each FOV object
+    for (const fov of examinationResponse.fov) {
+      fov.fovDataId = fov._id;
+      delete fov._id;
+      delete fov.__v;
+    }
+  } else {
+    examinationResponse.imagePreview =
+      "https://static.vecteezy.com/system/resources/previews/004/968/590/non_2x/no-result-data-not-found-concept-illustration-flat-design-eps10-simple-and-modern-graphic-element-for-landing-page-empty-state-ui-infographic-etc-vector.jpg";
+  }
+
+  // Log the transformed examination object for debugging
+  console.log(examinationResponse);
+
   return {
     message: "Examination data received successfully",
-    data: examination,
+    data: examinationResponse,
   };
 };
 

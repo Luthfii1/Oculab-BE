@@ -56,7 +56,10 @@ const ExaminationSchema = new mongoose.Schema({
     required: true,
     default: Date.now(),
   },
-  fov: [FOVDataSchema],
+  fov: {
+    type: [FOVDataSchema],
+    required: false,
+  },
   statusExamination: {
     type: String,
     required: true,
@@ -79,7 +82,7 @@ const ExaminationSchema = new mongoose.Schema({
   },
   systemBacteriaTotalCount: {
     type: Number,
-    required: false,
+    required: true,
   },
   bacteriaTotalCount: {
     type: Number,
@@ -87,7 +90,8 @@ const ExaminationSchema = new mongoose.Schema({
   },
   notes: {
     type: String,
-    required: false,
+    required: true,
+    default: "",
   },
 });
 

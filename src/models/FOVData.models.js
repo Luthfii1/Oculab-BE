@@ -15,7 +15,7 @@ const FOVDataSchema = new mongoose.Schema({
   },
   image: {
     type: String,
-    required: false,
+    required: true,
   },
   type: {
     type: String,
