@@ -1,4 +1,6 @@
 const Express = require("express");
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage()});
 const router = Express.Router();
 const examinationControllers = require("../controllers/Examination.controllers");
 
@@ -26,6 +28,7 @@ router.get(
 // router for get system diagnosis from examination id using video and send the video to other backend model server in URL/export-video/examinationId:
 router.post(
   "/post-system-diagnosis/:examinationId",
+  upload.single("video"),
   examinationControllers.postSystemDiagnosis
 );
 

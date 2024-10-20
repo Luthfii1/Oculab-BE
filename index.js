@@ -3,6 +3,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const db = require("./src/config/db");
+const modelBackend = require("./src/config/modelBackend");
 const app = express();
 
 // Import routes and other files here
@@ -14,6 +15,7 @@ const fovRoutes = require("./src/routes/Fov.routes");
 // Set up the server
 dotenv.config();
 db.connectDB();
+modelBackend.connectModelBackend();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -34,3 +36,4 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+

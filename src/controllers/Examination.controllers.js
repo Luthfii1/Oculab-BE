@@ -52,10 +52,22 @@ exports.getNumberOfExaminations = async function (req, res) {
 };
 
 exports.postSystemDiagnosis = async function (req, res) {
+
+  const { examinationId } = req.params;
+  const video = req.file
+
+  if (!video) {
+    return res.status(400).send({ message: "Video file is required in controller" });
+  }
+
+  if (!examinationId) {
+    return res.status(400).send({ message: "Examination ID is required" });
+  }
+
   try {
     const result = await ExaminationService.postSystemDiagnosis(
       req.params,
-      req.body
+      video
     );
     res.status(200).send(result);
   } catch (error) {
