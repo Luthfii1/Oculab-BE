@@ -1,5 +1,7 @@
+const { request } = require("express");
 const { Examination } = require("../models/Examination.models");
 const { Patient } = require("../models/Patient.models");
+const { URL_EXPORT_VIDEO, CHECK_VIDEO } = require("../config/constants");
 const fs = require("fs");
 const FormData = require("form-data");
 const dotenv = require("dotenv");
@@ -158,6 +160,8 @@ exports.getNumberOfExaminations = async function () {
 
 exports.forwardVideoToML = async function (file, params) {
   const { examinationId } = params;
+
+  // Check if examinationId is provided
   if (!examinationId) {
     throw new Error("Examination ID is required");
   }
@@ -176,7 +180,7 @@ exports.forwardVideoToML = async function (file, params) {
       throw new Error("We can't find the examination");
     }
 
-    const url = process.env.DOMAIN_ML + "/" + examinationId;
+    const url = URL_EXPORT_VIDEO + "/" + examinationId;
     const formData = new FormData();
 
     // Append the video file with the correct key
@@ -230,29 +234,4 @@ exports.forwardVideoToML = async function (file, params) {
 
     throw error;
   }
-};
-
-exports.testing = async function (body) {
-  const url = "https://oculab-be.vercel.app/patient/create-new-patient";
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Error response body:", errorText);
-    throw new Error(`Failed to forward video to ML service: ${errorText}`);
-  }
-
-  const data = await response.json();
-
-  return {
-    message: "Testing successful",
-    data: data,
-  };
 };
