@@ -51,6 +51,7 @@ exports.getNumberOfExaminations = async function (req, res) {
   }
 };
 
+
 exports.postSystemDiagnosis = async function (req, res) {
 
   const { examinationId } = req.params;
@@ -73,4 +74,25 @@ exports.postSystemDiagnosis = async function (req, res) {
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
-}
+};
+
+exports.forwardVideoToML = async function (req, res) {
+  try {
+    const result = await ExaminationService.forwardVideoToML(
+      req.file,
+      req.params
+    );
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
+
+exports.testing = async function (req, res) {
+  try {
+    const result = await ExaminationService.testing(req.body);
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
