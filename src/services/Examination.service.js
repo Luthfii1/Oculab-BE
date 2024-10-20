@@ -243,7 +243,7 @@ exports.forwardVideoToML = async function (file, params) {
       throw new Error("We can't find the examination");
     }
 
-    const url = process.env.DOMAIN_ML + "/" + examinationId;
+    const url = URL_EXPORT_VIDEO + "/" + examinationId;
     const formData = new FormData();
 
     // Append the video file with the correct key
