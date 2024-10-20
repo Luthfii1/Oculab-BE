@@ -30,11 +30,4 @@ router.post(
 );
 router.post("/testing", examinationControllers.testing);
 
-// router for get system diagnosis from examination id using video and send the video to other backend model server in URL/export-video/examinationId:
-router.post(
-  "/post-system-diagnosis/:examinationId",
-  uploadVideo.single("video"),
-  examinationControllers.postSystemDiagnosis
-);
-
 module.exports = router;

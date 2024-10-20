@@ -51,31 +51,6 @@ exports.getNumberOfExaminations = async function (req, res) {
   }
 };
 
-
-exports.postSystemDiagnosis = async function (req, res) {
-
-  const { examinationId } = req.params;
-  const video = req.file
-
-  if (!video) {
-    return res.status(400).send({ message: "Video file is required in controller" });
-  }
-
-  if (!examinationId) {
-    return res.status(400).send({ message: "Examination ID is required" });
-  }
-
-  try {
-    const result = await ExaminationService.postSystemDiagnosis(
-      req.params,
-      video
-    );
-    res.status(200).send(result);
-  } catch (error) {
-    res.status(500).send({ message: error.message });
-  }
-};
-
 exports.forwardVideoToML = async function (req, res) {
   try {
     const result = await ExaminationService.forwardVideoToML(

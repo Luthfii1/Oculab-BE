@@ -158,69 +158,6 @@ exports.getNumberOfExaminations = async function () {
   };
 };
 
-// service for post system diagnosis from examination id using video in multipart form request with body of video 
-// and send the video to other backend model server in URL/export-video/examinationId:
-exports.postSystemDiagnosis = async function (params, video) {
-  const { examinationId } = params;
-
-  // Check if examinationId is provided
-  if (!examinationId) {
-    throw new Error("Examination ID is required");
-  }
-
-  // Log the received video information
-  console.log(video);
-
-  // Function to send the video to the other model server and get system diagnosis
-  const sendVideoToOtherModelServer = async function (examinationId, video) {
-    try {
-      // Create FormData and append video and examinationId
-      console.log("Sending video to other model server...");
-      console.log(video)
-      const formData = new FormData();
-      formData.append('video', video.buffer);
-      formData.append('examinationId', examinationId); // Optional additional data
-  
-      // Make a POST request to send the video
-      const response = await fetch(`${CHECK_VIDEO}/${examinationId}`, {
-        method: 'POST',
-        body: formData, // Send FormData as body
-      });
-  
-      // Check if response is OK
-      if (!response.ok) {
-        const errorText = await response.text(); // Get error message from the response
-        throw new Error(`Failed to send video: ${response.statusText} - ${errorText}`);
-      }
-  
-      // Parse the response as JSON
-      const result = await response.json();
-      return result; // Return the parsed result
-    } catch (error) {
-      console.error("Error sending video to model server:", error.message);
-      throw new Error("Failed to send video to other model server: " + error.message);
-    }
-  };
-
-  // Get the system diagnosis result by sending the video
-  try {
-    const systemDiagnosisResult = await sendVideoToOtherModelServer(
-      examinationId,
-      video
-    );
-
-    // Log and return the result of the system diagnosis
-    console.log("System diagnosis result:", systemDiagnosisResult);
-    return {
-      message: "System diagnosis received successfully",
-      data: systemDiagnosisResult,
-    };
-  } catch (error) {
-    console.error("Error in postSystemDiagnosis:", error.message);
-    throw new Error("Error in postSystemDiagnosis: " + error.message);
-  }
-};
-
 exports.forwardVideoToML = async function (file, params) {
   const { examinationId } = params;
 
