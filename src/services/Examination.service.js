@@ -1,7 +1,7 @@
 const { request } = require("express");
 const { Examination } = require("../models/Examination.models");
 const { Patient } = require("../models/Patient.models");
-const { URL_EXPORT_VIDEO, CHECK_VIDEO } = require("../config/constants");
+const { URL_EXTRACT_VIDEO, CHECK_VIDEO } = require("../config/constants");
 const fs = require("fs");
 const FormData = require("form-data");
 const dotenv = require("dotenv");
@@ -159,9 +159,11 @@ exports.getNumberOfExaminations = async function () {
 };
 
 exports.forwardVideoToML = async function (file, params) {
-  const { examinationId } = params;
+  const { patientId, examinationId } = params;
 
-  // Check if examinationId is provided
+  if (!patientId) {
+    throw new Error("Patient ID is required");
+  }
   if (!examinationId) {
     throw new Error("Examination ID is required");
   }
@@ -169,31 +171,32 @@ exports.forwardVideoToML = async function (file, params) {
   const videoFilePath = file.path;
 
   try {
-    // Check if the video file exists
     if (!fs.existsSync(videoFilePath)) {
       throw new Error("Video file is required");
     }
 
-    // Check if examinationId exists
+    const patient = await Patient.findById(patientId);
+    if (!patient) {
+      throw new Error("We can't find the patient");
+    }
+
     const examination = await Examination.findById(examinationId);
     if (!examination) {
       throw new Error("We can't find the examination");
     }
 
-    const url = URL_EXPORT_VIDEO + "/" + examinationId;
-    // const url = process.env.MODEL_URL + "/export-video" + "/" + examinationId;
+    const url = URL_EXTRACT_VIDEO + "/" + patientId + "/" + examinationId;
     const formData = new FormData();
-
-    // Append the video file with the correct key
     formData.append("video", fs.createReadStream(videoFilePath), {
       filename: file.originalname,
       contentType: file.mimetype,
     });
 
-    // Send the video to the machine learning service
+    // You might consider using axios instead of fetch for better error handling
     const response = await fetch(url, {
       method: "POST",
       body: formData,
+      headers: formData.getHeaders(), // Necessary when using form-data package
     });
 
     if (!response.ok) {
@@ -204,7 +207,6 @@ exports.forwardVideoToML = async function (file, params) {
 
     const result = await response.json();
 
-    // Remove the temporary video file
     fs.unlink(videoFilePath, (err) => {
       if (err) {
         console.error(`Failed to remove temporary file: ${err}`);
@@ -220,7 +222,6 @@ exports.forwardVideoToML = async function (file, params) {
   } catch (error) {
     console.error("Error occurred:", error);
 
-    // Attempt to remove the temporary file even if an error occurred
     if (videoFilePath) {
       fs.unlink(videoFilePath, (err) => {
         if (err) {
