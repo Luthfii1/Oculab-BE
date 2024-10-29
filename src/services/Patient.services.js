@@ -70,6 +70,10 @@ exports.createNewPatient = async function (body) {
     const newPatient = new Patient(patient);
     await newPatient.save({ session });
 
+    // delete the __v field from the saved patient
+    const responsePatient = newPatient.toObject();
+    delete responsePatient.__v;
+
     for (const exam of savedExaminations) {
       await exam.save({ session });
     }
@@ -82,7 +86,10 @@ exports.createNewPatient = async function (body) {
     await session.commitTransaction();
     session.endSession();
 
-    return { message: "Patient data received successfully", data: newPatient };
+    return {
+      message: "Patient data received successfully",
+      data: responsePatient,
+    };
   } catch (error) {
     // Abort transaction if something goes wrong
     await session.abortTransaction();
