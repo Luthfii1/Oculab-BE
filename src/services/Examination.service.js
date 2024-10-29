@@ -180,7 +180,16 @@ exports.forwardVideoToML = async function (file, params) {
       throw new Error("We can't find the examination");
     }
 
-    const url = URL_EXPORT_VIDEO + "/" + examinationId;
+    // get patientId from examinationId
+    const patient = await Patient.findOne({ 'resultExamination._id': examinationId })
+    
+    if (!patient) {
+      throw new Error("We can't find the patient");
+    }
+
+    const patientId = patient._id
+
+    const url = `${URL_EXPORT_VIDEO}/${patientId}/${examinationId}`;
     const formData = new FormData();
 
     // Append the video file with the correct key
