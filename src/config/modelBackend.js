@@ -1,9 +1,7 @@
-const { request } = require("express");
 const { CHECKER_URL } = require("./constants");
 
 exports.connectModelBackend = async function () {
-  // const URI = CHECKER_URL;
-  const URI = process.env.MODEL_URL + "/check-connection";
+  const URI = CHECKER_URL;
 
   try {
     // Create a GET request to the model backend

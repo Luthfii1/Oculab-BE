@@ -180,8 +180,8 @@ exports.forwardVideoToML = async function (file, params) {
       throw new Error("We can't find the examination");
     }
 
-    // const url = URL_EXPORT_VIDEO + "/" + examinationId;
-    const url = process.env.MODEL_URL + "/export-video" + "/" + examinationId;
+    const url = URL_EXPORT_VIDEO + "/" + examinationId;
+    // const url = process.env.MODEL_URL + "/export-video" + "/" + examinationId;
     const formData = new FormData();
 
     // Append the video file with the correct key
