@@ -2,7 +2,7 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 
-const assetsDir = path.join(__dirname, "../assets");
+const assetsDir = path.join("/tmp", "assets");
 
 // Check if the folder exists, if not, create it
 if (!fs.existsSync(assetsDir)) {
