@@ -1,5 +1,4 @@
-// import env variables
-
+// Example URL and config constants
 const MODEL_URL = process.env.MODEL_URL || "http://127.0.0.1:5000";
 
 export const URL_EXPORT_VIDEO = `${MODEL_URL}/export-video`;

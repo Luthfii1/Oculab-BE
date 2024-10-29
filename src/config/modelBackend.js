@@ -2,14 +2,15 @@ const { request } = require("express");
 const { CHECKER_URL } = require("./constants");
 
 exports.connectModelBackend = async function () {
-  const URI = CHECKER_URL;
+  // const URI = CHECKER_URL;
+  const URI = process.env.MODEL_URL + "/check-connection";
 
   try {
     // Create a GET request to the model backend
     const response = await fetch(URI, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -28,9 +29,6 @@ exports.connectModelBackend = async function () {
       console.log("No response body from the model backend.");
     }
   } catch (error) {
-    console.error('Error connecting to the model backend:', error);
+    console.error("Error connecting to the model backend:", error);
   }
 };
-
-
-
