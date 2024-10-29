@@ -11,6 +11,7 @@ const { getHomePage } = require("./src/utils/LandingPage");
 const patientRoutes = require("./src/routes/Patient.routes");
 const examinationRoutes = require("./src/routes/Examination.routes");
 const fovRoutes = require("./src/routes/Fov.routes");
+const constants = require("./src/config/constants");
 
 // Set up the server
 dotenv.config();
@@ -36,4 +37,3 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
-
