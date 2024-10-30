@@ -53,7 +53,7 @@ const ExaminationSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: StatusExaminationType,
-    default: StatusExaminationType.INPROGRESS,
+    default: StatusExaminationType.NOTSTARTED,
   },
   systemResult: {
     type: SystemExamResultSchema,
