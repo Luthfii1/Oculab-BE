@@ -237,3 +237,11 @@ exports.forwardVideoToML = async function (file, params) {
     throw error;
   }
 };
+
+exports.getAllExaminations = async function () {
+  const examinations = await Examination.find();
+  return {
+    message: "Examination data received successfully",
+    data: examinations,
+  };
+};
