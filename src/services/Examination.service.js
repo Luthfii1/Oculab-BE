@@ -101,6 +101,8 @@ exports.updateExaminationResult = async function (params, body) {
 };
 
 exports.getExaminationById = async function (params) {
+  console.log("params: ", params);
+
   const { examinationId } = params;
   if (!examinationId) {
     throw new Error("Examination ID is required");
@@ -253,5 +255,32 @@ exports.getAllExaminations = async function () {
   return {
     message: "Examination data received successfully",
     data: responseData,
+  };
+};
+
+exports.getStatisticsTodoLab = async function (params) {
+  const { userId } = params;
+  if (!userId || userId === ":userId") {
+    throw new Error("User ID is required");
+  }
+
+  const totalFinished = await Examination.countDocuments({
+    PIC: userId,
+    statusExamination: "FINISHED",
+  });
+
+  const totalNotFinished = await Examination.countDocuments({
+    PIC: userId,
+    statusExamination: { $ne: "FINISHED" },
+  });
+
+  const statistics = {
+    totalFinished,
+    totalNotFinished,
+  };
+
+  return {
+    message: "Statistics data received successfully",
+    data: statistics,
   };
 };

@@ -71,3 +71,12 @@ exports.getAllExaminations = async function (req, res) {
     res.status(500).send({ message: error.message });
   }
 };
+
+exports.getStatisticsTodoLab = async function (req, res) {
+  try {
+    const result = await ExaminationService.getStatisticsTodoLab(req.params);
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
