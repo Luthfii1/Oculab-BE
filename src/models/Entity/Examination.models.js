@@ -1,11 +1,7 @@
 const mongoose = require("mongoose");
-const { FOVDataSchema } = require("./FOVData.models");
 const { ExamGoalType } = require("../Enum/ExamGoalType.enum");
 const { ExamPreparationType } = require("../Enum/ExamPreparationType.enum");
 const { StatusExaminationType } = require("../Enum/StatusExaminationType.enum");
-const { SystemExamResultSchema } = require("./SystemExamResult.model");
-const { ExpertExamResultSchema } = require("./ExpertExamResult.model");
-const { UserSchema } = require("./User.model");
 
 const ExaminationSchema = new mongoose.Schema({
   _id: {
@@ -40,7 +36,7 @@ const ExaminationSchema = new mongoose.Schema({
     default: Date.now(),
   },
   FOV: {
-    type: [FOVDataSchema],
+    type: [String],
     required: false,
   },
   imagePreview: {
@@ -56,15 +52,15 @@ const ExaminationSchema = new mongoose.Schema({
     default: StatusExaminationType.NOTSTARTED,
   },
   systemResult: {
-    type: SystemExamResultSchema,
+    type: String,
     required: false,
   },
   expertResult: {
-    type: ExpertExamResultSchema,
+    type: String,
     required: false,
   },
   PIC: {
-    type: UserSchema,
+    type: String,
     required: true,
   },
   examinationPlanDate: {

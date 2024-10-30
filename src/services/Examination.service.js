@@ -240,8 +240,27 @@ exports.forwardVideoToML = async function (file, params) {
 
 exports.getAllExaminations = async function () {
   const examinations = await Examination.find();
+
+  var responseData = [];
+
+  // find patient by examinationId
+  for (const examination of examinations) {
+    const patient = await Patient.findOne({
+      resultExamination: { $in: [examination._id] },
+    });
+
+    responseData.push({
+      examinationId: examination._id,
+      slideId: examination.slideId,
+      statusExamination: examination.statusExamination,
+      patientId: patient._id,
+      patientName: patient.name,
+      patientDoB: patient.DoB,
+    });
+  }
+
   return {
     message: "Examination data received successfully",
-    data: examinations,
+    data: responseData,
   };
 };
