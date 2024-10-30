@@ -1,17 +1,11 @@
 const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid");
-
-const FOVType = Object.freeze({
-  BTA0: "0 BTA",
-  BTA1TO9: "1-9 BTA",
-  BTAABOVE9: "≥ 10 BTA",
-});
+const { FOVType } = require("../Enum/FOVType.enum");
 
 const FOVDataSchema = new mongoose.Schema({
   _id: {
     type: String,
     required: true,
-    default: uuidv4,
   },
   image: {
     type: String,
@@ -19,7 +13,7 @@ const FOVDataSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: Object.values(FOVType),
+    enum: FOVType,
     required: true,
   },
   order: {
@@ -34,11 +28,11 @@ const FOVDataSchema = new mongoose.Schema({
   ],
   systemCount: {
     type: Number,
-    required: false,
+    required: true,
   },
   confidenceLevel: {
     type: mongoose.Decimal128,
-    required: false,
+    required: true,
   },
 });
 

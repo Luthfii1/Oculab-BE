@@ -1,28 +1,11 @@
 const mongoose = require("mongoose");
 const { FOVDataSchema } = require("./FOVData.models");
-
-const ExamGoalType = Object.freeze({
-  SCREENING: "SCREENING",
-  TREATMENT: "TREATMENT",
-});
-
-const ExamPreparationType = Object.freeze({
-  SPS: "SPS",
-  SP: "SP",
-});
-
-const GradingType = Object.freeze({
-  NEGATIVE: "NEGATIVE",
-  SCANTY: "SCANTY",
-  Plus1: "Positive 1+",
-  Plus2: "Positive 2+",
-  Plus3: "Positive 3+",
-});
-
-const StatusExaminationType = Object.freeze({
-  INPROGRESS: "In Progress",
-  FINISHED: "Finished",
-});
+const { ExamGoalType } = require("../Enum/ExamGoalType.enum");
+const { ExamPreparationType } = require("../Enum/ExamPreparationType.enum");
+const { StatusExaminationType } = require("../Enum/StatusExaminationType.enum");
+const { SystemExamResultSchema } = require("./SystemExamResult.model");
+const { ExpertExamResultSchema } = require("./ExpertExamResult.model");
+const { UserSchema } = require("./User.model");
 
 const ExaminationSchema = new mongoose.Schema({
   _id: {
@@ -31,12 +14,12 @@ const ExaminationSchema = new mongoose.Schema({
   },
   goal: {
     type: String,
-    enum: Object.values(ExamGoalType),
+    enum: ExamGoalType,
     required: true,
   },
   preparationType: {
     type: String,
-    enum: Object.values(ExamPreparationType),
+    enum: ExamPreparationType,
     required: true,
   },
   slideId: {
@@ -56,9 +39,15 @@ const ExaminationSchema = new mongoose.Schema({
     required: true,
     default: Date.now(),
   },
-  fov: {
+  FOV: {
     type: [FOVDataSchema],
     required: false,
+  },
+  imagePreview: {
+    type: String,
+    required: true,
+    default:
+      process.env.IMAGE_PREVIEW + "/eead8004-2fd7-4f40-be1f-1d02cb886af4.png",
   },
   statusExamination: {
     type: String,
@@ -66,32 +55,21 @@ const ExaminationSchema = new mongoose.Schema({
     enum: StatusExaminationType,
     default: StatusExaminationType.INPROGRESS,
   },
-  systemGrading: {
-    type: String,
-    enum: Object.values(GradingType),
+  systemResult: {
+    type: SystemExamResultSchema,
     required: false,
   },
-  confidenceLevelAggregated: {
-    type: Number,
+  expertResult: {
+    type: ExpertExamResultSchema,
     required: false,
   },
-  finalGrading: {
-    type: String,
-    enum: Object.values(GradingType),
-    required: false,
-  },
-  systemBacteriaTotalCount: {
-    type: Number,
+  PIC: {
+    type: UserSchema,
     required: true,
   },
-  bacteriaTotalCount: {
-    type: Number,
-    required: false,
-  },
-  notes: {
-    type: String,
+  examinationPlanDate: {
+    type: Date,
     required: true,
-    default: "",
   },
 });
 
