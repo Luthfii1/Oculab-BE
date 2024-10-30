@@ -1,6 +1,6 @@
 const { request } = require("express");
-const { Examination } = require("../models/Examination.models");
-const { Patient } = require("../models/Patient.models");
+const { Examination } = require("../models/Entity/Examination.models");
+const { Patient } = require("../models/Entity/Patient.models");
 const { URL_EXTRACT_VIDEO, CHECK_VIDEO } = require("../config/constants");
 const fs = require("fs");
 const FormData = require("form-data");

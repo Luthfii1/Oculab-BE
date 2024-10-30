@@ -1,10 +1,6 @@
 const mongoose = require("mongoose");
 const { ExaminationSchema } = require("./Examination.models");
-
-const SexType = Object.freeze({
-  MALE: "MALE",
-  FEMALE: "FEMALE",
-});
+const { SexType } = require("../Enum/SexType.enum");
 
 const PatientSchema = new mongoose.Schema({
   _id: {
@@ -25,7 +21,7 @@ const PatientSchema = new mongoose.Schema({
   },
   sex: {
     type: String,
-    enum: Object.values(SexType),
+    enum: SexType,
     required: true,
   },
   BPJS: {
@@ -36,6 +32,7 @@ const PatientSchema = new mongoose.Schema({
 });
 
 const Patient = mongoose.model("Patient", PatientSchema);
+
 module.exports = {
   Patient,
   PatientSchema,
