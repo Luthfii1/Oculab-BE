@@ -101,8 +101,6 @@ exports.updateExaminationResult = async function (params, body) {
 };
 
 exports.getExaminationById = async function (params) {
-  console.log("params: ", params);
-
   const { examinationId } = params;
   if (!examinationId) {
     throw new Error("Examination ID is required");
@@ -125,6 +123,9 @@ exports.getExaminationById = async function (params) {
 
   const PIC = await User.findById(examination.PIC);
   responseData.PIC = PIC;
+
+  const DPJP = await User.findById(examination.DPJP);
+  responseData.DPJP = DPJP;
 
   return {
     message: "Examination data received successfully",
