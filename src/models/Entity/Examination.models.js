@@ -67,6 +67,10 @@ const ExaminationSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  DPJP: {
+    type: String,
+    required: true,
+  },
 });
 
 const Examination = mongoose.model("Examination", ExaminationSchema);
