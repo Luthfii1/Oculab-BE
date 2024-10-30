@@ -28,6 +28,6 @@ router.post(
   uploadVideo.single("video"),
   examinationControllers.forwardVideoToML
 );
-router.post("/testing", examinationControllers.testing);
+router.get("/get-all-examinations", examinationControllers.getAllExaminations);
 
 module.exports = router;

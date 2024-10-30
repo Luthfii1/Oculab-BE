@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
-const { Patient } = require("../models/Patient.models");
-const { FOVData } = require("../models/FOVData.models");
-const { Examination } = require("../models/Examination.models");
+const { Patient } = require("../models/Entity/Patient.models");
+const { FOVData } = require("../models/Entity/FOVData.models");
+const { Examination } = require("../models/Entity/Examination.models");
 
 exports.createNewPatient = async function (body) {
   const { _id, name, NIK, DoB, sex, resultExamination, BPJS } = body;

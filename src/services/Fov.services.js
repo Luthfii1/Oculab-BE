@@ -1,6 +1,6 @@
-const { FOVData } = require("../models/FOVData.models");
-const { Examination } = require("../models/Examination.models");
-const { Patient } = require("../models/Patient.models");
+const { FOVData } = require("../models/Entity/FOVData.models");
+const { Examination } = require("../models/Entity/Examination.models");
+const { Patient } = require("../models/Entity/Patient.models");
 const mongoose = require("mongoose");
 
 exports.postFOVData = async function (params, body) {
