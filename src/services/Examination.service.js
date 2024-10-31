@@ -1,7 +1,9 @@
 const { request } = require("express");
-const { Examination } = require("../models/Examination.models");
-const { Patient } = require("../models/Patient.models");
-const { URL_EXPORT_VIDEO, CHECK_VIDEO } = require("../config/constants");
+const { Examination } = require("../models/Entity/Examination.models");
+const { Patient } = require("../models/Entity/Patient.models");
+const { FOVData } = require("../models/Entity/FOVData.models");
+const { User } = require("../models/Entity/User.models");
+const { URL_EXTRACT_VIDEO, CHECK_VIDEO } = require("../config/constants");
 const fs = require("fs");
 const FormData = require("form-data");
 const dotenv = require("dotenv");
@@ -99,6 +101,8 @@ exports.updateExaminationResult = async function (params, body) {
 };
 
 exports.getExaminationById = async function (params) {
+  console.log("params: ", params);
+
   const { examinationId } = params;
   if (!examinationId) {
     throw new Error("Examination ID is required");
@@ -109,33 +113,22 @@ exports.getExaminationById = async function (params) {
     throw new Error("Examination not found");
   }
 
-  const examinationResponse = examination.toObject();
-  // Replace _id with examinationId
-  examinationResponse.examinationId = examination._id;
-  delete examinationResponse._id;
-  delete examinationResponse.__v;
+  const responseData = {
+    ...examination.toObject(),
+    FOV: [],
+  };
 
-  // Add image preview from the first FOV image
-  if (examinationResponse.fov.length > 0) {
-    examinationResponse.imagePreview = examinationResponse.fov[0].image;
-
-    // Replace _id with fovDataId in each FOV object
-    for (const fov of examinationResponse.fov) {
-      fov.fovDataId = fov._id;
-      delete fov._id;
-      delete fov.__v;
-    }
-  } else {
-    examinationResponse.imagePreview =
-      "https://static.vecteezy.com/system/resources/previews/004/968/590/non_2x/no-result-data-not-found-concept-illustration-flat-design-eps10-simple-and-modern-graphic-element-for-landing-page-empty-state-ui-infographic-etc-vector.jpg";
+  for (const fovId of examination.FOV) {
+    const fov = await FOVData.findById(fovId);
+    responseData.FOV.push(fov);
   }
 
-  // Log the transformed examination object for debugging
-  console.log(examinationResponse);
+  const PIC = await User.findById(examination.PIC);
+  responseData.PIC = PIC;
 
   return {
     message: "Examination data received successfully",
-    data: examinationResponse,
+    data: responseData,
   };
 };
 
@@ -158,80 +151,136 @@ exports.getNumberOfExaminations = async function () {
   };
 };
 
-// exports.forwardVideoToML = async function (file, params) {
-//   const { examinationId } = params;
+exports.forwardVideoToML = async function (file, params) {
+  const { patientId, examinationId } = params;
 
-//   // Check if examinationId is provided
-//   if (!examinationId) {
-//     throw new Error("Examination ID is required");
-//   }
+  if (!patientId) {
+    throw new Error("Patient ID is required");
+  }
+  if (!examinationId) {
+    throw new Error("Examination ID is required");
+  }
 
-//   const videoFilePath = file.path;
+  const videoFilePath = file.path;
 
-//   try {
-//     // Check if the video file exists
-//     if (!fs.existsSync(videoFilePath)) {
-//       throw new Error("Video file is required");
-//     }
+  try {
+    if (!fs.existsSync(videoFilePath)) {
+      throw new Error("Video file is required");
+    }
 
-//     // Check if examinationId exists
-//     const examination = await Examination.findById(examinationId);
-//     if (!examination) {
-//       throw new Error("We can't find the examination");
-//     }
+    const patient = await Patient.findById(patientId);
+    if (!patient) {
+      throw new Error("We can't find the patient");
+    }
 
-//     const url = URL_EXPORT_VIDEO + "/" + examinationId;
-//     const formData = new FormData();
+    const examination = await Examination.findById(examinationId);
+    if (!examination) {
+      throw new Error("We can't find the examination");
+    }
 
-//     // Append the video file with the correct key
-//     formData.append("video", fs.createReadStream(videoFilePath), {
-//       filename: file.originalname,
-//       contentType: file.mimetype,
-//     });
+    const url = URL_EXTRACT_VIDEO + "/" + patientId + "/" + examinationId;
+    const formData = new FormData();
+    formData.append("video", fs.createReadStream(videoFilePath), {
+      filename: file.originalname,
+      contentType: file.mimetype,
+    });
 
-//     // Send the video to the machine learning service
-//     const response = await fetch(url, {
-//       method: "POST",
-//       body: formData,
-//     });
+    // You might consider using axios instead of fetch for better error handling
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+      headers: formData.getHeaders(), // Necessary when using form-data package
+    });
 
-//     if (!response.ok) {
-//       const errorText = await response.text();
-//       console.error("Error response body:", errorText);
-//       throw new Error(`Failed to forward video to ML service: ${errorText}`);
-//     }
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Error response body:", errorText);
+      throw new Error(`Failed to forward video to ML service: ${errorText}`);
+    }
 
-//     const result = await response.json();
+    const result = await response.json();
 
-//     // Remove the temporary video file
-//     fs.unlink(videoFilePath, (err) => {
-//       if (err) {
-//         console.error(`Failed to remove temporary file: ${err}`);
-//       } else {
-//         console.log(`Temporary file ${videoFilePath} has been removed.`);
-//       }
-//     });
+    fs.unlink(videoFilePath, (err) => {
+      if (err) {
+        console.error(`Failed to remove temporary file: ${err}`);
+      } else {
+        console.log(`Temporary file ${videoFilePath} has been removed.`);
+      }
+    });
 
-//     return {
-//       message: "Video forwarded to ML service successfully",
-//       data: result,
-//     };
-//   } catch (error) {
-//     console.error("Error occurred:", error);
+    return {
+      message: "Video forwarded to ML service successfully",
+      data: result,
+    };
+  } catch (error) {
+    console.error("Error occurred:", error);
 
-//     // Attempt to remove the temporary file even if an error occurred
-//     if (videoFilePath) {
-//       fs.unlink(videoFilePath, (err) => {
-//         if (err) {
-//           console.error("Failed to remove temporary file:", err);
-//         } else {
-//           console.log(
-//             `Temporary file ${videoFilePath} has been removed after error.`
-//           );
-//         }
-//       });
-//     }
+    if (videoFilePath) {
+      fs.unlink(videoFilePath, (err) => {
+        if (err) {
+          console.error("Failed to remove temporary file:", err);
+        } else {
+          console.log(
+            `Temporary file ${videoFilePath} has been removed after error.`
+          );
+        }
+      });
+    }
 
-//     throw error;
-//   }
-// };
+    throw error;
+  }
+};
+
+exports.getAllExaminations = async function () {
+  const examinations = await Examination.find();
+
+  var responseData = [];
+
+  // find patient by examinationId
+  for (const examination of examinations) {
+    const patient = await Patient.findOne({
+      resultExamination: { $in: [examination._id] },
+    });
+
+    responseData.push({
+      examinationId: examination._id,
+      slideId: examination.slideId,
+      statusExamination: examination.statusExamination,
+      patientId: patient._id,
+      patientName: patient.name,
+      patientDoB: patient.DoB,
+    });
+  }
+
+  return {
+    message: "Examination data received successfully",
+    data: responseData,
+  };
+};
+
+exports.getStatisticsTodoLab = async function (params) {
+  const { userId } = params;
+  if (!userId || userId === ":userId") {
+    throw new Error("User ID is required");
+  }
+
+  const totalFinished = await Examination.countDocuments({
+    PIC: userId,
+    statusExamination: "FINISHED",
+  });
+
+  const totalNotFinished = await Examination.countDocuments({
+    PIC: userId,
+    statusExamination: { $ne: "FINISHED" },
+  });
+
+  const statistics = {
+    totalFinished,
+    totalNotFinished,
+  };
+
+  return {
+    message: "Statistics data received successfully",
+    data: statistics,
+  };
+};

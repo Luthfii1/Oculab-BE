@@ -1,16 +1,28 @@
 const mongoose = require("mongoose");
-const { Patient } = require("../models/Patient.models");
-const { FOVData } = require("../models/FOVData.models");
-const { Examination } = require("../models/Examination.models");
+const { Patient } = require("../models/Entity/Patient.models");
+const { FOVData } = require("../models/Entity/FOVData.models");
+const { Examination } = require("../models/Entity/Examination.models");
 
 exports.createNewPatient = async function (body) {
-  const { patient } = body;
-  if (!patient) {
-    throw new Error("Patient data is required");
+  const { _id, name, NIK, DoB, sex, resultExamination, BPJS } = body;
+  if (!_id) {
+    throw new Error("Id Patient is required");
+  }
+  if (!name) {
+    throw new Error("Name is required");
+  }
+  if (!NIK) {
+    throw new Error("NIK is required");
+  }
+  if (!DoB) {
+    throw new Error("Date of Birth is required");
+  }
+  if (!sex) {
+    throw new Error("Sex is required");
   }
 
   // Check if patient._id already exists
-  const existingPatient = await Patient.findById(patient._id);
+  const existingPatient = await Patient.findById(_id);
   if (existingPatient) {
     throw new Error("Patient already exists");
   }
@@ -22,8 +34,8 @@ exports.createNewPatient = async function (body) {
     let savedExaminations = [];
     let savedFOVs = [];
 
-    if (patient.resultExamination) {
-      for (const examination of patient.resultExamination) {
+    if (resultExamination) {
+      for (const examination of resultExamination) {
         if (!examination._id) {
           throw new Error("Examination _id is required");
         }
@@ -35,7 +47,6 @@ exports.createNewPatient = async function (body) {
           throw new Error("Examination already exists");
         }
 
-        // Reset savedFOVs for each examination to avoid duplication
         let fovForCurrentExam = [];
 
         if (Array.isArray(examination.fov)) {
@@ -66,9 +77,13 @@ exports.createNewPatient = async function (body) {
       }
     }
 
-    // Save patient, examinations, and FOV data using the session
-    const newPatient = new Patient(patient);
+    // Create new patient using the extracted fields
+    const newPatient = new Patient({ _id, name, NIK, DoB, sex, BPJS });
     await newPatient.save({ session });
+
+    // Remove __v field from saved patient
+    const responsePatient = newPatient.toObject();
+    delete responsePatient.__v;
 
     for (const exam of savedExaminations) {
       await exam.save({ session });
@@ -82,7 +97,10 @@ exports.createNewPatient = async function (body) {
     await session.commitTransaction();
     session.endSession();
 
-    return { message: "Patient data received successfully", data: newPatient };
+    return {
+      message: "Patient data received successfully",
+      data: responsePatient,
+    };
   } catch (error) {
     // Abort transaction if something goes wrong
     await session.abortTransaction();

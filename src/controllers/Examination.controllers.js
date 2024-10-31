@@ -63,9 +63,18 @@ exports.getNumberOfExaminations = async function (req, res) {
 //   }
 // };
 
-exports.testing = async function (req, res) {
+exports.getAllExaminations = async function (req, res) {
   try {
-    const result = await ExaminationService.testing(req.body);
+    const result = await ExaminationService.getAllExaminations();
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
+
+exports.getStatisticsTodoLab = async function (req, res) {
+  try {
+    const result = await ExaminationService.getStatisticsTodoLab(req.params);
     res.status(200).send(result);
   } catch (error) {
     res.status(500).send({ message: error.message });

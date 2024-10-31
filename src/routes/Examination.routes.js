@@ -1,7 +1,7 @@
 const Express = require("express");
 const router = Express.Router();
 const examinationControllers = require("../controllers/Examination.controllers");
-// const { uploadVideo } = require("../middlewares/Asset.middlewares");
+const { uploadVideo } = require("../middlewares/Asset.middlewares");
 
 router.post(
   "/create-examination/:patientId",
@@ -23,11 +23,15 @@ router.get(
   "/get-number-of-examinations",
   examinationControllers.getNumberOfExaminations
 );
-// router.post(
-//   "/forward-video-to-ml/:examinationId",
-//   uploadVideo.single("video"),
-//   examinationControllers.forwardVideoToML
-// );
-router.post("/testing", examinationControllers.testing);
+router.post(
+  "/forward-video-to-ml/:patientId/:examinationId",
+  uploadVideo.single("video"),
+  examinationControllers.forwardVideoToML
+);
+router.get("/get-all-examinations", examinationControllers.getAllExaminations);
+router.get(
+  "/get-statistics-todo-lab/:userId",
+  examinationControllers.getStatisticsTodoLab
+);
 
 module.exports = router;
