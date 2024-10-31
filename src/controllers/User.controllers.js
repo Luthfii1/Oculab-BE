@@ -27,15 +27,6 @@ exports.refreshToken = async function (req, res) {
     }
 };
 
-exports.getAccessToken = async function(req, res) {
-    try {
-        const result = await userServices.getToken(req.params);
-        res.status(200).json(result);
-    } catch(error) {
-        res.status(500).json({message: error.message});
-    }
-};
-
 exports.getAllUsers = async function(req, res) {
     try {
         const result = await userServices.getAllUsers();
@@ -48,15 +39,6 @@ exports.getAllUsers = async function(req, res) {
 exports.getUserById = async function(req, res) {
     try {
         const result = await userServices.getUserById(req.params);
-        res.status(200).json(result);
-    } catch(error) {
-        res.status(500).json({message: error.message});
-    }
-};
-
-exports.logout = async function (req, res) {
-    try {
-        const result = await userServices.logout(req.params);
         res.status(200).json(result);
     } catch(error) {
         res.status(500).json({message: error.message});
