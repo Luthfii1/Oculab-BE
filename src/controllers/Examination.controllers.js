@@ -51,17 +51,17 @@ exports.getNumberOfExaminations = async function (req, res) {
   }
 };
 
-exports.forwardVideoToML = async function (req, res) {
-  try {
-    const result = await ExaminationService.forwardVideoToML(
-      req.file,
-      req.params
-    );
-    res.status(200).send(result);
-  } catch (error) {
-    res.status(500).send({ message: error.message });
-  }
-};
+// exports.forwardVideoToML = async function (req, res) {
+//   try {
+//     const result = await ExaminationService.forwardVideoToML(
+//       req.file,
+//       req.params
+//     );
+//     res.status(200).send(result);
+//   } catch (error) {
+//     res.status(500).send({ message: error.message });
+//   }
+// };
 
 exports.testing = async function (req, res) {
   try {

@@ -158,80 +158,80 @@ exports.getNumberOfExaminations = async function () {
   };
 };
 
-exports.forwardVideoToML = async function (file, params) {
-  const { examinationId } = params;
+// exports.forwardVideoToML = async function (file, params) {
+//   const { examinationId } = params;
 
-  // Check if examinationId is provided
-  if (!examinationId) {
-    throw new Error("Examination ID is required");
-  }
+//   // Check if examinationId is provided
+//   if (!examinationId) {
+//     throw new Error("Examination ID is required");
+//   }
 
-  const videoFilePath = file.path;
+//   const videoFilePath = file.path;
 
-  try {
-    // Check if the video file exists
-    if (!fs.existsSync(videoFilePath)) {
-      throw new Error("Video file is required");
-    }
+//   try {
+//     // Check if the video file exists
+//     if (!fs.existsSync(videoFilePath)) {
+//       throw new Error("Video file is required");
+//     }
 
-    // Check if examinationId exists
-    const examination = await Examination.findById(examinationId);
-    if (!examination) {
-      throw new Error("We can't find the examination");
-    }
+//     // Check if examinationId exists
+//     const examination = await Examination.findById(examinationId);
+//     if (!examination) {
+//       throw new Error("We can't find the examination");
+//     }
 
-    const url = URL_EXPORT_VIDEO + "/" + examinationId;
-    const formData = new FormData();
+//     const url = URL_EXPORT_VIDEO + "/" + examinationId;
+//     const formData = new FormData();
 
-    // Append the video file with the correct key
-    formData.append("video", fs.createReadStream(videoFilePath), {
-      filename: file.originalname,
-      contentType: file.mimetype,
-    });
+//     // Append the video file with the correct key
+//     formData.append("video", fs.createReadStream(videoFilePath), {
+//       filename: file.originalname,
+//       contentType: file.mimetype,
+//     });
 
-    // Send the video to the machine learning service
-    const response = await fetch(url, {
-      method: "POST",
-      body: formData,
-    });
+//     // Send the video to the machine learning service
+//     const response = await fetch(url, {
+//       method: "POST",
+//       body: formData,
+//     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Error response body:", errorText);
-      throw new Error(`Failed to forward video to ML service: ${errorText}`);
-    }
+//     if (!response.ok) {
+//       const errorText = await response.text();
+//       console.error("Error response body:", errorText);
+//       throw new Error(`Failed to forward video to ML service: ${errorText}`);
+//     }
 
-    const result = await response.json();
+//     const result = await response.json();
 
-    // Remove the temporary video file
-    fs.unlink(videoFilePath, (err) => {
-      if (err) {
-        console.error(`Failed to remove temporary file: ${err}`);
-      } else {
-        console.log(`Temporary file ${videoFilePath} has been removed.`);
-      }
-    });
+//     // Remove the temporary video file
+//     fs.unlink(videoFilePath, (err) => {
+//       if (err) {
+//         console.error(`Failed to remove temporary file: ${err}`);
+//       } else {
+//         console.log(`Temporary file ${videoFilePath} has been removed.`);
+//       }
+//     });
 
-    return {
-      message: "Video forwarded to ML service successfully",
-      data: result,
-    };
-  } catch (error) {
-    console.error("Error occurred:", error);
+//     return {
+//       message: "Video forwarded to ML service successfully",
+//       data: result,
+//     };
+//   } catch (error) {
+//     console.error("Error occurred:", error);
 
-    // Attempt to remove the temporary file even if an error occurred
-    if (videoFilePath) {
-      fs.unlink(videoFilePath, (err) => {
-        if (err) {
-          console.error("Failed to remove temporary file:", err);
-        } else {
-          console.log(
-            `Temporary file ${videoFilePath} has been removed after error.`
-          );
-        }
-      });
-    }
+//     // Attempt to remove the temporary file even if an error occurred
+//     if (videoFilePath) {
+//       fs.unlink(videoFilePath, (err) => {
+//         if (err) {
+//           console.error("Failed to remove temporary file:", err);
+//         } else {
+//           console.log(
+//             `Temporary file ${videoFilePath} has been removed after error.`
+//           );
+//         }
+//       });
+//     }
 
-    throw error;
-  }
-};
+//     throw error;
+//   }
+// };
