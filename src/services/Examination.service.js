@@ -250,6 +250,7 @@ exports.getAllExaminations = async function () {
       patientId: patient._id,
       patientName: patient.name,
       patientDoB: patient.DoB,
+      examinationPlanDate: examination.examinationPlanDate,
     });
   }
 
