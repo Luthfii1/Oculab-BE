@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
 const { RolesType } = require("../Enum/RolesType.enum");
+const { v4: uuidv4 } = require("uuid");
 
 const UserSchema = new mongoose.Schema({
   _id: {
     type: String,
     required: true,
+    default: uuidv4
   },
   name: {
     type: String,
