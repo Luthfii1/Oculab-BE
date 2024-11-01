@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const { ExaminationSchema } = require("./Examination.models");
 const { SexType } = require("../Enum/SexType.enum");
 
 const PatientSchema = new mongoose.Schema({
@@ -28,7 +27,10 @@ const PatientSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  resultExamination: [ExaminationSchema],
+  resultExamination: {
+    type: [String],
+    required: false,
+  },
 });
 
 const Patient = mongoose.model("Patient", PatientSchema);

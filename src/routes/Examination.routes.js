@@ -29,5 +29,9 @@ router.post(
   examinationControllers.forwardVideoToML
 );
 router.get("/get-all-examinations", examinationControllers.getAllExaminations);
+router.get(
+  "/get-statistics-todo-lab/:userId",
+  examinationControllers.getStatisticsTodoLab
+);
 
 module.exports = router;

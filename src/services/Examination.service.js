@@ -1,6 +1,8 @@
 const { request } = require("express");
 const { Examination } = require("../models/Entity/Examination.models");
 const { Patient } = require("../models/Entity/Patient.models");
+const { FOVData } = require("../models/Entity/FOVData.models");
+const { User } = require("../models/Entity/User.models");
 const { URL_EXTRACT_VIDEO, CHECK_VIDEO } = require("../config/constants");
 const fs = require("fs");
 const FormData = require("form-data");
@@ -109,33 +111,25 @@ exports.getExaminationById = async function (params) {
     throw new Error("Examination not found");
   }
 
-  const examinationResponse = examination.toObject();
-  // Replace _id with examinationId
-  examinationResponse.examinationId = examination._id;
-  delete examinationResponse._id;
-  delete examinationResponse.__v;
+  const responseData = {
+    ...examination.toObject(),
+    FOV: [],
+  };
 
-  // Add image preview from the first FOV image
-  if (examinationResponse.fov.length > 0) {
-    examinationResponse.imagePreview = examinationResponse.fov[0].image;
-
-    // Replace _id with fovDataId in each FOV object
-    for (const fov of examinationResponse.fov) {
-      fov.fovDataId = fov._id;
-      delete fov._id;
-      delete fov.__v;
-    }
-  } else {
-    examinationResponse.imagePreview =
-      "https://static.vecteezy.com/system/resources/previews/004/968/590/non_2x/no-result-data-not-found-concept-illustration-flat-design-eps10-simple-and-modern-graphic-element-for-landing-page-empty-state-ui-infographic-etc-vector.jpg";
+  for (const fovId of examination.FOV) {
+    const fov = await FOVData.findById(fovId);
+    responseData.FOV.push(fov);
   }
 
-  // Log the transformed examination object for debugging
-  console.log(examinationResponse);
+  const PIC = await User.findById(examination.PIC);
+  responseData.PIC = PIC;
+
+  const DPJP = await User.findById(examination.DPJP);
+  responseData.DPJP = DPJP;
 
   return {
     message: "Examination data received successfully",
-    data: examinationResponse,
+    data: responseData,
   };
 };
 
@@ -240,8 +234,54 @@ exports.forwardVideoToML = async function (file, params) {
 
 exports.getAllExaminations = async function () {
   const examinations = await Examination.find();
+
+  var responseData = [];
+
+  // find patient by examinationId
+  for (const examination of examinations) {
+    const patient = await Patient.findOne({
+      resultExamination: { $in: [examination._id] },
+    });
+
+    responseData.push({
+      examinationId: examination._id,
+      slideId: examination.slideId,
+      statusExamination: examination.statusExamination,
+      patientId: patient._id,
+      patientName: patient.name,
+      patientDoB: patient.DoB,
+    });
+  }
+
   return {
     message: "Examination data received successfully",
-    data: examinations,
+    data: responseData,
+  };
+};
+
+exports.getStatisticsTodoLab = async function (params) {
+  const { userId } = params;
+  if (!userId || userId === ":userId") {
+    throw new Error("User ID is required");
+  }
+
+  const totalFinished = await Examination.countDocuments({
+    PIC: userId,
+    statusExamination: "FINISHED",
+  });
+
+  const totalNotFinished = await Examination.countDocuments({
+    PIC: userId,
+    statusExamination: { $ne: "FINISHED" },
+  });
+
+  const statistics = {
+    totalFinished,
+    totalNotFinished,
+  };
+
+  return {
+    message: "Statistics data received successfully",
+    data: statistics,
   };
 };
