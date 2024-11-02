@@ -6,6 +6,7 @@ const FOVDataSchema = new mongoose.Schema({
   _id: {
     type: String,
     required: true,
+    default: uuidv4,
   },
   image: {
     type: String,

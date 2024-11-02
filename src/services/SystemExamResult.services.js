@@ -1,16 +1,11 @@
-const { FOVData } = require("../models/Entity/FOVData.models");
+const { SystemExamResult } = require("../models/Entity/SystemExamResult.model");
 const { Examination } = require("../models/Entity/Examination.models");
 const { Patient } = require("../models/Entity/Patient.models");
 
-exports.postFOVData = async function (params, body) {
+exports.postSystemResult = async function (body, params) {
   const { examinationId } = params;
   if (!examinationId) {
     throw new Error("Examination ID is required");
-  }
-
-  const { fovData } = body;
-  if (!fovData) {
-    throw new Error("FOVData is required");
   }
 
   const existingExamination = await Examination.findById(examinationId);
@@ -25,14 +20,19 @@ exports.postFOVData = async function (params, body) {
     throw new Error("Patient not found");
   }
 
-  const newFOVData = new FOVData(fovData);
-  await newFOVData.save();
+  const { systemResult } = body;
+  if (!systemResult) {
+    throw new Error("System Result Data is required");
+  }
 
-  existingExamination.FOV.push(newFOVData._id);
+  const newSystemResultData = new SystemExamResult(systemResult);
+  await newSystemResultData.save();
+
+  existingExamination.systemResult = newSystemResultData._id;
   await existingExamination.save();
 
   return {
-    message: "FOVData received successfully",
-    data: newFOVData,
+    message: "System result received successfully",
+    data: newSystemResultData,
   };
 };

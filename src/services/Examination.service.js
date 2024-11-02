@@ -18,8 +18,8 @@ exports.createExamination = async function (params, body) {
     throw new Error("Patient ID is required");
   }
 
-  const { examination } = body;
-  if (!examination) {
+  const { _id, goal, preparationType, slideId } = body;
+  if (!_id || !goal || !preparationType || !slideId) {
     throw new Error("Examination data is required");
   }
 
@@ -28,9 +28,31 @@ exports.createExamination = async function (params, body) {
     throw new Error("Patient not found");
   }
 
-  const newExamination = new Examination(examination);
+  const existingExamination = await Examination.findById(_id);
+  if (existingExamination) {
+    throw new Error("Examination ID already exists");
+  }
+
+  const existingSlideId = await Examination.findOne({ slideId: slideId });
+  if (existingSlideId) {
+    throw new Error(`Slide ID ${slideId} already exists`);
+  }
+
+  let FOV = [];
+  let systemResult, expertResult, PIC;
+  const newExamination = new Examination({
+    _id,
+    goal,
+    preparationType,
+    slideId,
+    PIC,
+    FOV,
+    systemResult,
+    expertResult,
+  });
   await newExamination.save();
-  patient.resultExamination.push(newExamination);
+
+  patient.examination.push(newExamination._id);
   await patient.save();
 
   return {

@@ -1,18 +1,21 @@
-const mongoose = require("mongoose");
 const { Patient } = require("../models/Entity/Patient.models");
 const { FOVData } = require("../models/Entity/FOVData.models");
 const { Examination } = require("../models/Entity/Examination.models");
 
 exports.createNewPatient = async function (body) {
-  const { _id, name, NIK, DoB, sex, resultExamination, BPJS } = body;
+  const { _id, name, NIK, DoB, sex, BPJS } = body;
   if (!_id) {
-    throw new Error("Id Patient is required");
+    throw new Error("Patient ID is required");
   }
   if (!name) {
     throw new Error("Name is required");
   }
   if (!NIK) {
     throw new Error("NIK is required");
+  } else if (!/^\d{16}$/.test(NIK)) {
+    throw new Error(
+      "NIK must be a 16-digit number with no spaces or special characters"
+    );
   }
   if (!DoB) {
     throw new Error("Date of Birth is required");
@@ -22,91 +25,29 @@ exports.createNewPatient = async function (body) {
   }
 
   // Check if patient._id already exists
-  const existingPatient = await Patient.findById(_id);
+  const existingPatient = await Patient.findOne({ NIK: NIK });
   if (existingPatient) {
-    throw new Error("Patient already exists");
+    throw new Error(`Patient with NIK ${NIK} already exists`);
   }
 
-  const session = await mongoose.startSession(); // Start the session
-  session.startTransaction(); // Begin transaction
+  let examination = [];
 
-  try {
-    let savedExaminations = [];
-    let savedFOVs = [];
+  // Create new patient using the extracted fields
+  const newPatient = new Patient({
+    _id,
+    name,
+    NIK,
+    DoB,
+    sex,
+    BPJS,
+    examination,
+  });
+  await newPatient.save();
 
-    if (resultExamination) {
-      for (const examination of resultExamination) {
-        if (!examination._id) {
-          throw new Error("Examination _id is required");
-        }
-
-        const existingExamination = await Examination.findById(
-          examination._id
-        ).session(session);
-        if (existingExamination) {
-          throw new Error("Examination already exists");
-        }
-
-        let fovForCurrentExam = [];
-
-        if (Array.isArray(examination.fov)) {
-          for (const fov of examination.fov) {
-            if (!fov._id) {
-              throw new Error("FOVData _id is required");
-            }
-
-            const existingFOV = await FOVData.findById(fov._id).session(
-              session
-            );
-            if (existingFOV) {
-              throw new Error("FOVData already exists");
-            }
-
-            const newFOVData = new FOVData(fov);
-            fovForCurrentExam.push(newFOVData);
-            savedFOVs.push(newFOVData);
-          }
-        } else {
-          throw new Error("FOVData must be an array");
-        }
-
-        examination.fov = fovForCurrentExam;
-
-        const newExamination = new Examination(examination);
-        savedExaminations.push(newExamination);
-      }
-    }
-
-    // Create new patient using the extracted fields
-    const newPatient = new Patient({ _id, name, NIK, DoB, sex, BPJS });
-    await newPatient.save({ session });
-
-    // Remove __v field from saved patient
-    const responsePatient = newPatient.toObject();
-    delete responsePatient.__v;
-
-    for (const exam of savedExaminations) {
-      await exam.save({ session });
-    }
-
-    for (const fov of savedFOVs) {
-      await fov.save({ session });
-    }
-
-    // Commit transaction
-    await session.commitTransaction();
-    session.endSession();
-
-    return {
-      message: "Patient data received successfully",
-      data: responsePatient,
-    };
-  } catch (error) {
-    // Abort transaction if something goes wrong
-    await session.abortTransaction();
-    session.endSession();
-    throw error;
-  }
+  return {
+    message: "Patient data received successfully",
+    data: newPatient,
+  };
 };
 
 exports.getAllPatients = async function () {

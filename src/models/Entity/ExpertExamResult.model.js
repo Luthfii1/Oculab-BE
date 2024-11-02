@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
+const { v4: uuidv4 } = require("uuid");
 const { GradingType } = require("../Enum/GradingType.enum");
 
 const ExpertExamResultSchema = new mongoose.Schema({
   _id: {
     type: String,
     required: true,
+    default: uuidv4,
   },
   finalGrading: {
     type: String,
