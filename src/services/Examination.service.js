@@ -255,30 +255,31 @@ exports.forwardVideoToML = async function (file, params) {
 };
 
 exports.getAllExaminations = async function () {
-  const examinations = await Examination.find();
+  
+    // Fetch all examinations
+    const examinations = await Examination.find();
 
-  var responseData = [];
+    // Fetch all patients
+    const patients = await Patient.find();
 
-  // find patient by examinationId
-  for (const examination of examinations) {
-    const patient = await Patient.findOne({
-      resultExamination: { $in: [examination._id] },
-    });
+    // Map through the examinations to create the desired output
+    const examinationDetails = examinations.map(examination => {
+      // Find the patient related to the examination (if applicable)
+      const patient = patients.find(p => p.examination.includes(examination._id)) || {}; // Adjust this condition as necessary
 
-    responseData.push({
-      examinationId: examination._id,
-      slideId: examination.slideId,
-      statusExamination: examination.statusExamination,
-      patientId: patient._id,
-      patientName: patient.name,
-      patientDoB: patient.DoB,
-      examinationPlanDate: examination.examinationPlanDate,
-    });
-  }
+      return {
+        examinationId: examination._id,
+        slideId: examination.slideId,
+        statusExamination: examination.statusExamination,
+        patientId: patient._id || null,
+        patientName: patient.name || null,
+        patientDoB: patient.DoB || null,
+        examinationPlanDate: examination.examinationPlanDate,
+    }});
 
   return {
     message: "Examination data received successfully",
-    data: responseData,
+    data: examinationDetails,
   };
 };
 
