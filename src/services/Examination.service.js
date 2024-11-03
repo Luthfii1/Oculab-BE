@@ -243,15 +243,17 @@ exports.getAllExaminations = async function () {
       resultExamination: { $in: [examination._id] },
     });
 
-    responseData.push({
-      examinationId: examination._id,
-      slideId: examination.slideId,
-      statusExamination: examination.statusExamination,
-      patientId: patient._id,
-      patientName: patient.name,
-      patientDoB: patient.DoB,
-      examinationPlanDate: examination.examinationPlanDate,
-    });
+    if (patient) {
+      responseData.push({
+        examinationId: examination._id,
+        slideId: examination.slideId,
+        statusExamination: examination.statusExamination,
+        patientId: patient._id,
+        patientName: patient.name,
+        patientDoB: patient.DoB,
+        examinationPlanDate: examination.examinationPlanDate,
+      });
+    }
   }
 
   return {
