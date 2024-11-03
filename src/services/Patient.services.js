@@ -159,14 +159,16 @@ exports.getAllPatientsByName = async function (params) {
   // Convert each patient document to a plain JavaScript object and modify it
   const patientsResponse = patients.map((patient) => {
     const patientObj = patient.toObject();
-
-    // Replace the _id with patientId
-    patientObj.patientId = patientObj._id;
-    delete patientObj._id;
-    delete patientObj.resultExamination;
     delete patientObj.__v;
 
     return patientObj;
+  });
+
+  // sort by the similarity of front name
+  patientsResponse.sort((a, b) => {
+    const aFrontName = a.name.split(" ")[0];
+    const bFrontName = b.name.split(" ")[0];
+    return aFrontName.localeCompare(bFrontName);
   });
 
   return {
