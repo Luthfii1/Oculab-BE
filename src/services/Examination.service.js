@@ -1,5 +1,6 @@
 const { request } = require("express");
 const { Examination } = require("../models/Entity/Examination.models");
+const { ExpertExamResult } = require("../models/Entity/ExpertExamResult.model");
 const { Patient } = require("../models/Entity/Patient.models");
 const { FOVData } = require("../models/Entity/FOVData.models");
 const { User } = require("../models/Entity/User.models");
@@ -134,16 +135,34 @@ exports.getExaminationById = async function (params) {
 };
 
 exports.getNumberOfExaminations = async function () {
-  const totalNegative = await Examination.countDocuments({
-    finalGrading: "NEGATIVE",
-  });
-  const totalPositive = await Examination.countDocuments({
-    finalGrading: { $ne: "NEGATIVE" },
-  });
+  const allExpertExamResults = await ExpertExamResult.find();
+
+  const totalNegative = allExpertExamResults.filter(
+    (result) => result.finalGrading === "NEGATIVE"
+  ).length;
+
+  const totalScandy = allExpertExamResults.filter(
+    (result) => result.finalGrading === "SCANTY"
+  ).length;
+
+  const totalPositive1 = allExpertExamResults.filter(
+    (result) => result.finalGrading === "Positive 1+"
+  ).length;
+
+  const totalPositive2 = allExpertExamResults.filter(
+    (result) => result.finalGrading === "Positive 2+"
+  ).length;
+
+  const totalPositive3 = allExpertExamResults.filter(
+    (result) => result.finalGrading === "Positive 3+"
+  ).length;
 
   const numberOfExaminations = {
-    numberOfPositive: totalPositive,
-    numberOfNegative: totalNegative,
+    negative: totalNegative,
+    scanty: totalScandy,
+    positive1: totalPositive1,
+    positive2: totalPositive2,
+    positive3: totalPositive3,
   };
 
   return {
