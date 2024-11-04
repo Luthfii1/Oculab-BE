@@ -47,8 +47,11 @@ exports.postSystemResult = async function (body, params) {
   existingExamination.systemResult = newSystemResultData._id;
   await existingExamination.save();
 
+  const systemResultResponse = newSystemResultData.toObject();
+  delete systemResultResponse.__v;
+
   return {
     message: "System result received successfully",
-    data: newSystemResultData,
+    data: systemResultResponse,
   };
 };

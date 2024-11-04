@@ -19,7 +19,7 @@ exports.postFOVData = async function (params, body) {
   if (!order) {
     throw new Error("Order is required");
   }
-  if (systemCount === undefined) {
+  if (systemCount === undefined || !systemCount) {
     throw new Error("System count is required");
   }
   if (!confidenceLevel) {
@@ -52,9 +52,12 @@ exports.postFOVData = async function (params, body) {
   existingExamination.FOV.push(newFOVData._id);
   await existingExamination.save();
 
+  const FOVResponse = newFOVData.toObject();
+  delete FOVResponse.__v;
+
   return {
     message: "FOVData received successfully",
-    data: newFOVData,
+    data: FOVResponse,
   };
 };
 

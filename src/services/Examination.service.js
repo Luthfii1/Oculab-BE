@@ -103,9 +103,14 @@ exports.createExamination = async function (params, body) {
   patient.resultExamination.push(newExamination._id);
   await patient.save();
 
+  const responseData = newExamination.toObject();
+  delete responseData.__v;
+  delete responseData.FOV;
+  delete responseData.imagePreview;
+
   return {
     message: "Examination data received successfully",
-    data: newExamination,
+    data: responseData,
   };
 };
 

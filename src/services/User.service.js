@@ -62,7 +62,10 @@ exports.register = async function (body) {
   });
   await newUser.save();
 
-  return { message: "User registered successfully", data: newUser };
+  const response = newUser.toObject();
+  delete response.__v;
+
+  return { message: "User registered successfully", data: response };
 };
 
 exports.refreshToken = async function (body, params) {
