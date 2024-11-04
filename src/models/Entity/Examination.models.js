@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { v4: uuidv4 } = require("uuid");
 const { ExamGoalType } = require("../Enum/ExamGoalType.enum");
 const { ExamPreparationType } = require("../Enum/ExamPreparationType.enum");
 const { StatusExaminationType } = require("../Enum/StatusExaminationType.enum");
@@ -7,6 +8,7 @@ const ExaminationSchema = new mongoose.Schema({
   _id: {
     type: String,
     required: true,
+    default: uuidv4,
   },
   goal: {
     type: String,
@@ -66,6 +68,7 @@ const ExaminationSchema = new mongoose.Schema({
   examinationPlanDate: {
     type: Date,
     required: true,
+    default: Date.now(),
   },
   DPJP: {
     type: String,
