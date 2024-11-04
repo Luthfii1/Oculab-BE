@@ -14,18 +14,34 @@ exports.postSystemResult = async function (body, params) {
   }
 
   const patient = await Patient.findOne({
-    examination: existingExamination._id,
+    resultExamination: existingExamination._id,
   });
   if (!patient) {
     throw new Error("Patient not found");
   }
 
-  const { systemResult } = body;
-  if (!systemResult) {
-    throw new Error("System Result Data is required");
+  const {
+    _id,
+    systemGrading,
+    confidenceLevelAggregated,
+    systemBacteriaTotalCount,
+  } = body;
+  if (!systemGrading) {
+    throw new Error("System grading is required");
+  }
+  if (!confidenceLevelAggregated) {
+    throw new Error("Confidence level (aggregated) is required");
+  }
+  if (!systemBacteriaTotalCount) {
+    throw new Error("System bacteria total count is required");
   }
 
-  const newSystemResultData = new SystemExamResult(systemResult);
+  const newSystemResultData = new SystemExamResult({
+    _id,
+    systemGrading,
+    confidenceLevelAggregated,
+    systemBacteriaTotalCount,
+  });
   await newSystemResultData.save();
 
   existingExamination.systemResult = newSystemResultData._id;

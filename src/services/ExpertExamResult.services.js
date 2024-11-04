@@ -14,18 +14,29 @@ exports.postExpertResult = async function (body, params) {
   }
 
   const patient = await Patient.findOne({
-    examination: existingExamination._id,
+    resultExamination: existingExamination._id,
   });
   if (!patient) {
     throw new Error("Patient not found");
   }
 
-  const { expertResult } = body;
-  if (!expertResult) {
-    throw new Error("Expert Result Data is required");
+  const { _id, finalGrading, bacteriaTotalCount, notes } = body;
+  if (!finalGrading) {
+    throw new Error("Final grading is required");
+  }
+  if (!bacteriaTotalCount === undefined) {
+    throw new Error("Bacteria total count is required");
+  }
+  if (!notes) {
+    throw new Error("Notes is required");
   }
 
-  const newExpertResultData = new ExpertExamResult(expertResult);
+  const newExpertResultData = new ExpertExamResult({
+    _id,
+    finalGrading,
+    bacteriaTotalCount,
+    notes,
+  });
   await newExpertResultData.save();
 
   existingExamination.expertResult = newExpertResultData._id;

@@ -18,9 +18,41 @@ exports.createExamination = async function (params, body) {
     throw new Error("Patient ID is required");
   }
 
-  const { _id, goal, preparationType, slideId } = body;
-  if (!_id || !goal || !preparationType || !slideId) {
-    throw new Error("Examination data is required");
+  const {
+    _id,
+    goal,
+    preparationType,
+    slideId,
+    examinationDate,
+    statusExamination,
+    PIC,
+    DPJP,
+    examinationPlanDate,
+  } = body;
+
+  if (!goal) {
+    throw new Error("Examination goal type is required");
+  }
+  if (!preparationType) {
+    throw new Error("Examination preparation type is required");
+  }
+  if (!slideId) {
+    throw new Error("Slide ID is required");
+  }
+  if (!examinationDate) {
+    throw new Error("Examination date is required");
+  }
+  if (!statusExamination) {
+    throw new Error("Status of examination is required");
+  }
+  if (!PIC) {
+    throw new Error("PIC is required");
+  }
+  if (!DPJP) {
+    throw new Error("DPJP is required");
+  }
+  if (!examinationPlanDate) {
+    throw new Error("Examination plan date is required");
   }
 
   const patient = await Patient.findById(patientId);
@@ -38,21 +70,35 @@ exports.createExamination = async function (params, body) {
     throw new Error(`Slide ID ${slideId} already exists`);
   }
 
+  const existingLAB = await User.findOne({ _id: PIC });
+  if (!existingLAB) {
+    throw new Error("No matching Lab Technician found for the provided ID");
+  }
+
+  const existingDPJP = await User.findOne({ _id: DPJP });
+  if (!existingDPJP) {
+    throw new Error("No matching DPJP found for the provided ID");
+  }
+
   let FOV = [];
-  let systemResult, expertResult, PIC;
+  let systemResult, expertResult;
   const newExamination = new Examination({
     _id,
     goal,
     preparationType,
     slideId,
-    PIC,
+    examinationDate,
+    statusExamination,
     FOV,
     systemResult,
     expertResult,
+    PIC,
+    examinationPlanDate,
+    DPJP,
   });
   await newExamination.save();
 
-  patient.examination.push(newExamination._id);
+  patient.resultExamination.push(newExamination._id);
   await patient.save();
 
   return {

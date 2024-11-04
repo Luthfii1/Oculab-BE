@@ -4,9 +4,6 @@ const { Examination } = require("../models/Entity/Examination.models");
 
 exports.createNewPatient = async function (body) {
   const { _id, name, NIK, DoB, sex, BPJS } = body;
-  if (!_id) {
-    throw new Error("Patient ID is required");
-  }
   if (!name) {
     throw new Error("Name is required");
   }
@@ -30,7 +27,12 @@ exports.createNewPatient = async function (body) {
     throw new Error(`Patient with NIK ${NIK} already exists`);
   }
 
-  let examination = [];
+  const existingBPJS = await Patient.findOne({ BPJS: BPJS });
+  if (existingBPJS) {
+    throw new Error(`Patient with BPJS ${BPJS} already exists`);
+  }
+
+  let resultExamination = [];
 
   // Create new patient using the extracted fields
   const newPatient = new Patient({
@@ -40,7 +42,7 @@ exports.createNewPatient = async function (body) {
     DoB,
     sex,
     BPJS,
-    examination,
+    resultExamination,
   });
   await newPatient.save();
 
@@ -66,23 +68,23 @@ exports.getPatientById = async function (params) {
     throw new Error("Patient ID is required");
   }
 
-  const patient = await Patient.findById(patientId);
-  if (!patient) {
+  const existingPatient = await Patient.findById(patientId);
+  if (!existingPatient) {
     throw new Error("Patient not found");
   }
 
-  const patientWithoutResultExamination = patient.toObject();
-  delete patientWithoutResultExamination.resultExamination;
+  // const patientWithoutResultExamination = patient.toObject();
+  // delete patientWithoutResultExamination.resultExamination;
 
   // change the _id into patientId
-  patientWithoutResultExamination.patientId =
-    patientWithoutResultExamination._id;
-  delete patientWithoutResultExamination._id;
-  delete patientWithoutResultExamination.__v;
+  // patientWithoutResultExamination.patientId =
+  //   patientWithoutResultExamination._id;
+  // delete patientWithoutResultExamination._id;
+  // delete patientWithoutResultExamination.__v;
 
   return {
     message: "Patient data received successfully",
-    data: patientWithoutResultExamination,
+    data: existingPatient,
   };
 };
 

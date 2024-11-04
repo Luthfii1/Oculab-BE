@@ -8,9 +8,22 @@ exports.postFOVData = async function (params, body) {
     throw new Error("Examination ID is required");
   }
 
-  const { fovData } = body;
-  if (!fovData) {
-    throw new Error("FOVData is required");
+  const { _id, image, type, order, comment, systemCount, confidenceLevel } =
+    body;
+  if (!image) {
+    throw new Error("Image is required");
+  }
+  if (!type) {
+    throw new Error("Type is required");
+  }
+  if (!order) {
+    throw new Error("Order is required");
+  }
+  if (systemCount === undefined) {
+    throw new Error("System count is required");
+  }
+  if (!confidenceLevel) {
+    throw new Error("Confidence level is required");
   }
 
   const existingExamination = await Examination.findById(examinationId);
@@ -19,13 +32,21 @@ exports.postFOVData = async function (params, body) {
   }
 
   const patient = await Patient.findOne({
-    examination: existingExamination._id,
+    resultExamination: existingExamination._id,
   });
   if (!patient) {
     throw new Error("Patient not found");
   }
 
-  const newFOVData = new FOVData(fovData);
+  const newFOVData = new FOVData({
+    _id,
+    image,
+    type,
+    order,
+    comment,
+    systemCount,
+    confidenceLevel,
+  });
   await newFOVData.save();
 
   existingExamination.FOV.push(newFOVData._id);

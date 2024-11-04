@@ -4,7 +4,6 @@ const {
   generateRefreshToken,
 } = require("../utils/TokenUtilities");
 const { hashPassword } = require("../utils/PasswordUtilities");
-const globalSalt = process.env.GLOBAL_SALT;
 
 exports.login = async function (body) {
   const { email, password } = body;
@@ -18,7 +17,7 @@ exports.login = async function (body) {
     throw new Error("User doesn't exist");
   }
 
-  const hashedPassword = hashPassword(password, globalSalt);
+  const hashedPassword = hashPassword(password);
   if (hashedPassword !== existingUser.password) {
     throw new Error("Incorrect password");
   }
@@ -34,7 +33,6 @@ exports.login = async function (body) {
 
 exports.register = async function (body) {
   const { _id, name, role, email, password } = body;
-
   if (!name) {
     throw new Error("Name is required");
   }
@@ -53,7 +51,7 @@ exports.register = async function (body) {
     throw new Error("User already exists");
   }
 
-  const hashedPassword = hashPassword(password, globalSalt);
+  const hashedPassword = hashPassword(password);
 
   const newUser = new User({
     _id: _id,

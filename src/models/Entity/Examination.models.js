@@ -63,15 +63,16 @@ const ExaminationSchema = new mongoose.Schema({
   },
   PIC: {
     type: String,
-    required: false,
+    required: true,
   },
   examinationPlanDate: {
     type: Date,
-    required: false,
+    required: true,
+    default: Date.now(),
   },
   DPJP: {
     type: String,
-    required: false,
+    required: true,
   },
 });
 

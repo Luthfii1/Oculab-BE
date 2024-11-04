@@ -29,7 +29,7 @@ const PatientSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  examination: {
+  resultExamination: {
     type: [String],
     required: false,
   },

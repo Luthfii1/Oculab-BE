@@ -1,9 +1,10 @@
 const crypto = require("crypto");
+const globalSalt = process.env.GLOBAL_SALT;
 
-function hashPassword(password, salt) {
-    return crypto.createHmac("sha256", salt).update(password).digest("hex");
+function hashPassword(password) {
+  return crypto.createHmac("sha256", globalSalt).update(password).digest("hex");
 }
 
 module.exports = {
-    hashPassword
+  hashPassword,
 };
