@@ -1,8 +1,6 @@
 const { FOVData } = require("../models/Entity/FOVData.models");
 const { Examination } = require("../models/Entity/Examination.models");
 const { Patient } = require("../models/Entity/Patient.models");
-const mongoose = require("mongoose");
-const { response } = require("express");
 
 exports.postFOVData = async function (params, body) {
   const { examinationId } = params;
@@ -10,54 +8,57 @@ exports.postFOVData = async function (params, body) {
     throw new Error("Examination ID is required");
   }
 
-  const { fovData } = body;
-  if (!fovData) {
-    throw new Error("FOVData is required");
+  const { _id, image, type, order, comment, systemCount, confidenceLevel } =
+    body;
+  if (!image) {
+    throw new Error("Image is required");
+  }
+  if (!type) {
+    throw new Error("Type is required");
+  }
+  if (!order) {
+    throw new Error("Order is required");
+  }
+  if (systemCount === undefined || !systemCount) {
+    throw new Error("System count is required");
+  }
+  if (!confidenceLevel) {
+    throw new Error("Confidence level is required");
   }
 
-  const examination = await Examination.findById(examinationId);
-  if (!examination) {
+  const existingExamination = await Examination.findById(examinationId);
+  if (!existingExamination) {
     throw new Error("Examination not found");
   }
 
   const patient = await Patient.findOne({
-    "resultExamination._id": examination._id,
+    resultExamination: existingExamination._id,
   });
   if (!patient) {
     throw new Error("Patient not found");
   }
 
-  // start session and transaction to ensure data consistency
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  const newFOVData = new FOVData({
+    _id,
+    image,
+    type,
+    order,
+    comment,
+    systemCount,
+    confidenceLevel,
+  });
+  await newFOVData.save();
 
-  try {
-    const newFOVData = new FOVData(fovData);
-    const savedFOVData = await newFOVData.save({ session });
-    examination.fov.push(newFOVData);
-    await examination.save({ session });
+  existingExamination.FOV.push(newFOVData._id);
+  await existingExamination.save();
 
-    //   save to user and update the resultExamination with the new examination
-    await Patient.updateOne(
-      { "resultExamination._id": examination._id },
-      {
-        $push: { "resultExamination.$.fov": savedFOVData },
-      }
-    ).session(session);
+  const FOVResponse = newFOVData.toObject();
+  delete FOVResponse.__v;
 
-    // commit the transaction
-    await session.commitTransaction();
-    session.endSession();
-
-    return {
-      message: "FOVData received successfully",
-      data: newFOVData,
-    };
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    throw error;
-  }
+  return {
+    message: "FOVData received successfully",
+    data: FOVResponse,
+  };
 };
 
 exports.getAllFOVByExaminationId = async function (params) {
