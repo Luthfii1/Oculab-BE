@@ -8,6 +8,7 @@ const { URL_EXTRACT_VIDEO, CHECK_VIDEO } = require("../config/constants");
 const fs = require("fs");
 const FormData = require("form-data");
 const dotenv = require("dotenv");
+const { SystemExamResult } = require("../models/Entity/SystemExamResult.model");
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
@@ -119,14 +120,43 @@ exports.getExaminationById = async function (params) {
 
   for (const fovId of examination.FOV) {
     const fov = await FOVData.findById(fovId);
-    responseData.FOV.push(fov);
+    const fovResponse = fov.toObject();
+    delete fovResponse.__v;
+
+    responseData.FOV.push(fovResponse);
   }
 
   const PIC = await User.findById(examination.PIC);
-  responseData.PIC = PIC;
+  const PICResponse = PIC.toObject();
+  delete PICResponse.__v;
+  responseData.PIC = PICResponse;
 
   const DPJP = await User.findById(examination.DPJP);
-  responseData.DPJP = DPJP;
+  const DPJPResponse = DPJP.toObject();
+  delete DPJPResponse.__v;
+  responseData.DPJP = DPJPResponse;
+
+  if (examination.systemResult) {
+    const systemResult = await SystemExamResult.findById(
+      examination.systemResult
+    );
+    const systemResultResponse = systemResult.toObject();
+    delete systemResultResponse.__v;
+
+    responseData.systemResult = systemResultResponse;
+  }
+
+  if (examination.expertResult) {
+    const expertResult = await ExpertExamResult.findById(
+      examination.expertResult
+    );
+    const expertResultResponse = expertResult.toObject();
+    delete expertResultResponse.__v;
+
+    responseData.expertResult = expertResultResponse;
+  }
+
+  delete responseData.__v;
 
   return {
     message: "Examination data received successfully",
