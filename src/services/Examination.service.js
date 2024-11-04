@@ -115,16 +115,16 @@ exports.getExaminationById = async function (params) {
 
   const responseData = {
     ...examination.toObject(),
-    FOV: [],
+    // FOV: [],
   };
 
-  for (const fovId of examination.FOV) {
-    const fov = await FOVData.findById(fovId);
-    const fovResponse = fov.toObject();
-    delete fovResponse.__v;
+  // for (const fovId of examination.FOV) {
+  //   const fov = await FOVData.findById(fovId);
+  //   const fovResponse = fov.toObject();
+  //   delete fovResponse.__v;
 
-    responseData.FOV.push(fovResponse);
-  }
+  //   responseData.FOV.push(fovResponse);
+  // }
 
   const PIC = await User.findById(examination.PIC);
   const PICResponse = PIC.toObject();
@@ -157,6 +157,7 @@ exports.getExaminationById = async function (params) {
   }
 
   delete responseData.__v;
+  delete responseData.FOV;
 
   return {
     message: "Examination data received successfully",
