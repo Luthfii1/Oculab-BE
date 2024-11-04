@@ -1,5 +1,6 @@
 const { request } = require("express");
 const { Examination } = require("../models/Entity/Examination.models");
+const { ExpertExamResult } = require("../models/Entity/ExpertExamResult.model");
 const { Patient } = require("../models/Entity/Patient.models");
 const { FOVData } = require("../models/Entity/FOVData.models");
 const { User } = require("../models/Entity/User.models");
@@ -7,6 +8,7 @@ const { URL_EXTRACT_VIDEO, CHECK_VIDEO } = require("../config/constants");
 const fs = require("fs");
 const FormData = require("form-data");
 const dotenv = require("dotenv");
+const { SystemExamResult } = require("../models/Entity/SystemExamResult.model");
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
@@ -181,19 +183,49 @@ exports.getExaminationById = async function (params) {
 
   const responseData = {
     ...examination.toObject(),
-    FOV: [],
+    // FOV: [],
   };
 
-  for (const fovId of examination.FOV) {
-    const fov = await FOVData.findById(fovId);
-    responseData.FOV.push(fov);
-  }
+  // for (const fovId of examination.FOV) {
+  //   const fov = await FOVData.findById(fovId);
+  //   const fovResponse = fov.toObject();
+  //   delete fovResponse.__v;
+
+  //   responseData.FOV.push(fovResponse);
+  // }
 
   const PIC = await User.findById(examination.PIC);
-  responseData.PIC = PIC;
+  const PICResponse = PIC.toObject();
+  delete PICResponse.__v;
+  responseData.PIC = PICResponse;
 
   const DPJP = await User.findById(examination.DPJP);
-  responseData.DPJP = DPJP;
+  const DPJPResponse = DPJP.toObject();
+  delete DPJPResponse.__v;
+  responseData.DPJP = DPJPResponse;
+
+  if (examination.systemResult) {
+    const systemResult = await SystemExamResult.findById(
+      examination.systemResult
+    );
+    const systemResultResponse = systemResult.toObject();
+    delete systemResultResponse.__v;
+
+    responseData.systemResult = systemResultResponse;
+  }
+
+  if (examination.expertResult) {
+    const expertResult = await ExpertExamResult.findById(
+      examination.expertResult
+    );
+    const expertResultResponse = expertResult.toObject();
+    delete expertResultResponse.__v;
+
+    responseData.expertResult = expertResultResponse;
+  }
+
+  delete responseData.__v;
+  delete responseData.FOV;
 
   return {
     message: "Examination data received successfully",
@@ -202,16 +234,34 @@ exports.getExaminationById = async function (params) {
 };
 
 exports.getNumberOfExaminations = async function () {
-  const totalNegative = await Examination.countDocuments({
-    finalGrading: "NEGATIVE",
-  });
-  const totalPositive = await Examination.countDocuments({
-    finalGrading: { $ne: "NEGATIVE" },
-  });
+  const allExpertExamResults = await ExpertExamResult.find();
+
+  const totalNegative = allExpertExamResults.filter(
+    (result) => result.finalGrading === "NEGATIVE"
+  ).length;
+
+  const totalScandy = allExpertExamResults.filter(
+    (result) => result.finalGrading === "SCANTY"
+  ).length;
+
+  const totalPositive1 = allExpertExamResults.filter(
+    (result) => result.finalGrading === "Positive 1+"
+  ).length;
+
+  const totalPositive2 = allExpertExamResults.filter(
+    (result) => result.finalGrading === "Positive 2+"
+  ).length;
+
+  const totalPositive3 = allExpertExamResults.filter(
+    (result) => result.finalGrading === "Positive 3+"
+  ).length;
 
   const numberOfExaminations = {
-    numberOfPositive: totalPositive,
-    numberOfNegative: totalNegative,
+    negative: totalNegative,
+    scanty: totalScandy,
+    positive1: totalPositive1,
+    positive2: totalPositive2,
+    positive3: totalPositive3,
   };
 
   return {
@@ -311,15 +361,17 @@ exports.getAllExaminations = async function () {
       resultExamination: { $in: [examination._id] },
     });
 
-    responseData.push({
-      examinationId: examination._id,
-      slideId: examination.slideId,
-      statusExamination: examination.statusExamination,
-      patientId: patient._id,
-      patientName: patient.name,
-      patientDoB: patient.DoB,
-      examinationPlanDate: examination.examinationPlanDate,
-    });
+    if (patient) {
+      responseData.push({
+        examinationId: examination._id,
+        slideId: examination.slideId,
+        statusExamination: examination.statusExamination,
+        patientId: patient._id,
+        patientName: patient.name,
+        patientDoB: patient.DoB,
+        examinationPlanDate: examination.examinationPlanDate,
+      });
+    }
   }
 
   return {

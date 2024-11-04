@@ -14,7 +14,7 @@ const SystemExamResultSchema = new mongoose.Schema({
     required: true,
   },
   confidenceLevelAggregated: {
-    type: mongoose.Decimal128,
+    type: Number,
     required: true,
   },
   systemBacteriaTotalCount: {

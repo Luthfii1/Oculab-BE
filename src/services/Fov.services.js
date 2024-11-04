@@ -57,3 +57,52 @@ exports.postFOVData = async function (params, body) {
     data: newFOVData,
   };
 };
+
+exports.getAllFOVByExaminationId = async function (params) {
+  const { examinationId } = params;
+  if (!examinationId) {
+    throw new Error("Examination ID is required");
+  }
+
+  const examination = await Examination.findById(examinationId);
+  if (!examination) {
+    throw new Error("Examination not found");
+  }
+
+  if (examination.FOV.length === 0) {
+    return {
+      message: "FOVData received successfully",
+      data: {},
+    };
+  }
+
+  const allFovsId = examination.FOV;
+  const fovBta0 = [];
+  const fovBta1to9 = [];
+  const fovBtaAbove9 = [];
+
+  for (const fovId of allFovsId) {
+    const fov = await FOVData.findById(fovId);
+    const fovResponse = fov.toObject();
+    delete fovResponse.__v;
+
+    if (fovResponse.type === "BTA0") {
+      fovBta0.push(fovResponse);
+    } else if (fovResponse.type === "BTA1TO9") {
+      fovBta1to9.push(fovResponse);
+    } else {
+      fovBtaAbove9.push(fovResponse);
+    }
+  }
+
+  const responseData = {
+    BTA0: fovBta0,
+    BTA1TO9: fovBta1to9,
+    BTAABOVE9: fovBtaAbove9,
+  };
+
+  return {
+    message: "FOVData received successfully",
+    data: responseData,
+  };
+};
