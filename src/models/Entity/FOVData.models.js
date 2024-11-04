@@ -31,7 +31,7 @@ const FOVDataSchema = new mongoose.Schema({
     required: true,
   },
   confidenceLevel: {
-    type: mongoose.Decimal128,
+    type: Number,
     required: true,
   },
 });
