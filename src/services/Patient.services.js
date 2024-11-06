@@ -126,13 +126,19 @@ exports.updatePatient = async function (body, params) {
 };
 
 exports.getAllPatients = async function () {
-  console.log("getAllPatients");
-
-  // get all patients from db
   const patients = await Patient.find();
-  print("patients", patients);
 
-  return { message: "Patient data received successfully", data: patients };
+  const patientsResponse = patients.map((patient) => {
+    const patientObj = patient.toObject();
+    delete patientObj.__v;
+
+    return patientObj;
+  });
+
+  return {
+    message: "Patient data received successfully",
+    data: patientsResponse,
+  };
 };
 
 exports.getPatientById = async function (params) {
@@ -146,18 +152,12 @@ exports.getPatientById = async function (params) {
     throw new Error("Patient not found");
   }
 
-  // const patientWithoutResultExamination = patient.toObject();
-  // delete patientWithoutResultExamination.resultExamination;
-
-  // change the _id into patientId
-  // patientWithoutResultExamination.patientId =
-  //   patientWithoutResultExamination._id;
-  // delete patientWithoutResultExamination._id;
-  // delete patientWithoutResultExamination.__v;
+  const patientWithoutResultExamination = existingPatient.toObject();
+  delete patientWithoutResultExamination.resultExamination;
 
   return {
     message: "Patient data received successfully",
-    data: existingPatient,
+    data: patientWithoutResultExamination,
   };
 };
 
