@@ -2,40 +2,43 @@ const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid");
 const { FOVType } = require("../Enum/FOVType.enum");
 
-const FOVDataSchema = new mongoose.Schema({
-  _id: {
-    type: String,
-    required: true,
-    default: uuidv4,
-  },
-  image: {
-    type: String,
-    required: true,
-  },
-  type: {
-    type: String,
-    enum: FOVType,
-    required: true,
-  },
-  order: {
-    type: Number,
-    required: true,
-  },
-  comment: [
-    {
+const FOVDataSchema = new mongoose.Schema(
+  {
+    _id: {
       type: String,
-      required: false,
+      required: true,
+      default: uuidv4,
     },
-  ],
-  systemCount: {
-    type: Number,
-    required: true,
+    image: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: FOVType,
+      required: true,
+    },
+    order: {
+      type: Number,
+      required: true,
+    },
+    comment: [
+      {
+        type: String,
+        required: false,
+      },
+    ],
+    systemCount: {
+      type: Number,
+      required: true,
+    },
+    confidenceLevel: {
+      type: mongoose.Decimal128,
+      required: true,
+    },
   },
-  confidenceLevel: {
-    type: mongoose.Decimal128,
-    required: true,
-  },
-});
+  { versionKey: false } // Disables the __v field for versioning
+);
 
 const FOVData = mongoose.model("FOVData", FOVDataSchema);
 

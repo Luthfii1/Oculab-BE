@@ -4,15 +4,25 @@ const { Examination } = require("../models/Entity/Examination.models");
 
 exports.createNewPatient = async function (body) {
   const { _id, name, NIK, DoB, sex, BPJS } = body;
+
   if (!name) {
     throw new Error("Name is required");
   }
-  if (!NIK) {
-    throw new Error("NIK is required");
-  } else if (!/^\d{16}$/.test(NIK)) {
-    throw new Error(
-      "NIK must be a 16-digit number with no spaces or special characters"
-    );
+  if (NIK) {
+    if (!NIK) {
+      throw new Error("NIK is required");
+    }
+
+    const existingNIK = await Patient.findOne({ NIK: NIK });
+    if (existingNIK) {
+      throw new Error(`Patient with NIK ${NIK} already exists`);
+    }
+
+    if (!/^\d{16}$/.test(NIK)) {
+      throw new Error(
+        "NIK must be a 16-digit number with no spaces or special characters"
+      );
+    }
   }
   if (!DoB) {
     throw new Error("Date of Birth is required");
@@ -20,16 +30,21 @@ exports.createNewPatient = async function (body) {
   if (!sex) {
     throw new Error("Sex is required");
   }
+  if (BPJS) {
+    const existingBPJS = await Patient.findOne({ BPJS: BPJS });
+    if (existingBPJS) {
+      throw new Error(`Patient with BPJS ${BPJS} already exists`);
+    }
 
-  // Check if patient._id already exists
-  const existingPatient = await Patient.findOne({ NIK: NIK });
-  if (existingPatient) {
-    throw new Error(`Patient with NIK ${NIK} already exists`);
+    if (!/^\d{13}$/.test(BPJS)) {
+      throw new Error("BPJS must be a 13-digit numeric string");
+    }
   }
 
-  const existingBPJS = await Patient.findOne({ BPJS: BPJS });
-  if (existingBPJS) {
-    throw new Error(`Patient with BPJS ${BPJS} already exists`);
+  // Check if patient._id already exists
+  const existingId = await Patient.findById(_id);
+  if (existingId) {
+    throw new Error(`Patient with ID ${_id} already exists`);
   }
 
   let resultExamination = [];
@@ -49,6 +64,64 @@ exports.createNewPatient = async function (body) {
   return {
     message: "Patient data received successfully",
     data: newPatient,
+  };
+};
+
+exports.updatePatient = async function (body, params) {
+  const { patientId } = params;
+  if (!patientId) {
+    throw new Error("Patient ID is required");
+  }
+
+  const existingPatient = await Patient.findById(patientId);
+  if (!existingPatient) {
+    throw new Error("Patient not found");
+  }
+
+  const { name, NIK, DoB, sex, BPJS } = body;
+  let changesDetected = false;
+
+  if (name && name !== existingPatient.name) {
+    existingPatient.name = name;
+    changesDetected = true;
+  }
+  if (NIK && NIK !== existingPatient.NIK) {
+    existingPatient.NIK = NIK;
+    changesDetected = true;
+  }
+  if (
+    DoB &&
+    new Date(DoB).toISOString() !== existingPatient.DoB.toISOString()
+  ) {
+    existingPatient.DoB = DoB;
+    changesDetected = true;
+  }
+  if (sex && sex !== existingPatient.sex) {
+    existingPatient.sex = sex;
+    changesDetected = true;
+  }
+  if (BPJS === "") {
+    existingPatient.BPJS = undefined;
+    changesDetected = true;
+  } else if (BPJS) {
+    if (!/^\d{13}$/.test(BPJS)) {
+      throw new Error("BPJS must be a 13-digit numeric string");
+    }
+    if (BPJS !== existingPatient.BPJS) {
+      existingPatient.BPJS = BPJS;
+      changesDetected = true;
+    }
+  }
+
+  if (!changesDetected) {
+    return { message: "No changes detected in patient data" };
+  }
+
+  await existingPatient.save();
+
+  return {
+    message: "Patient data updated successfully",
+    data: existingPatient,
   };
 };
 
