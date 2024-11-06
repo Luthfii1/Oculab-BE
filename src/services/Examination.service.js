@@ -408,8 +408,11 @@ exports.getStatisticsTodoLab = async function (params) {
 
 exports.getMonthlyExaminations = async function (params) {
   const { month, year } = params;
+  if (!month || !year) {
+    throw new Error("Month and year are required");
+  }
 
-  const DECIMAL_BASE = 10; // To avoid compatibility issues in different JavaScript environments
+  const DECIMAL_BASE = 10;
   const FIRST_DAY_OF_MONTH = 1;
 
   const monthNum = parseInt(month, DECIMAL_BASE);
@@ -441,7 +444,7 @@ exports.getMonthlyExaminations = async function (params) {
           patientId: patient._id,
           patientName: patient.name,
           patientDoB: patient.DoB,
-          examinationPlanDate: examination.examinationPlanDate,
+          examinationDate: examination.examinationDate,
         });
       }
     }
