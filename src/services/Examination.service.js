@@ -408,7 +408,7 @@ exports.getStatisticsTodoLab = async function (params) {
 
 exports.getMonthlyExaminations = async function (params) {
   const { month, year } = params;
-  if (!month || !year) {
+  if (!month || !year || month === ":month" || year === ":year") {
     throw new Error("Month and year are required");
   }
 
@@ -423,7 +423,7 @@ exports.getMonthlyExaminations = async function (params) {
 
   try {
     const examinations = await Examination.find({
-      examinationPlanDate: {
+      examinationDate: {
         $gte: startDate,
         $lt: endDate,
       },
