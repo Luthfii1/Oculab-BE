@@ -128,3 +128,24 @@ exports.getUserById = async function (params) {
     data: user,
   };
 };
+
+exports.getAllPics = async function () {
+  const users = await User.find();
+  if (!users) {
+    throw new Error("User not found");
+  }
+
+  const pics = users.map((user) => {
+    const userObj = user.toObject();
+    delete userObj.password;
+    delete userObj.__v;
+    delete userObj.email;
+
+    return userObj;
+  });
+
+  return {
+    message: "All users data received successfully",
+    data: pics,
+  };
+};
