@@ -111,7 +111,7 @@ exports.getAllUsers = async function () {
 
 exports.getUserById = async function (params) {
   const { userId } = params;
-  if (!userId) {
+  if (!userId || userId === ":userId") {
     throw new Error("User ID is required");
   }
 
