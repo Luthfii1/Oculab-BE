@@ -130,7 +130,6 @@ exports.getAllPatients = async function () {
 
   const patientsResponse = patients.map((patient) => {
     const patientObj = patient.toObject();
-    delete patientObj.resultExamination;
     delete patientObj.__v;
 
     return patientObj;
