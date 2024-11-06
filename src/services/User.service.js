@@ -120,6 +120,9 @@ exports.getUserById = async function (params) {
     throw new Error("User not found");
   }
 
+  const userResponse = user.toObject();
+  delete userResponse.password;
+
   return {
     message: "User data received successfully",
     data: user,
