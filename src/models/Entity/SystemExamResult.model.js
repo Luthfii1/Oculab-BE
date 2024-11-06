@@ -9,21 +9,22 @@ const SystemExamResultSchema = new mongoose.Schema(
       required: true,
       default: uuidv4,
     },
-  systemGrading: {
-    type: String,
-    enum: GradingType,
-    required: true,
-  },
-  confidenceLevelAggregated: {
-    type: Number,
-    required: true,
-  },
-  systemBacteriaTotalCount: {
-    type: Number,
-    required: true,
+    systemGrading: {
+      type: String,
+      enum: GradingType,
+      required: true,
+    },
+    confidenceLevelAggregated: {
+      type: Number,
+      required: true,
+    },
+    systemBacteriaTotalCount: {
+      type: Number,
+      required: true,
+    },
   },
   { versionKey: false } // Disables the __v field for versioning
-});
+);
 
 const SystemExamResult = mongoose.model(
   "SystemExamResult",
