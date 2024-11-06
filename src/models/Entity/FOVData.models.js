@@ -33,12 +33,11 @@ const FOVDataSchema = new mongoose.Schema(
       required: true,
     },
     confidenceLevel: {
-      type: mongoose.Decimal128,
+      type: Number,
       required: true,
     },
-  },
-  { versionKey: false } // Disables the __v field for versioning
-);
+    { versionKey: false } // Disables the __v field for versioning
+  });
 
 const FOVData = mongoose.model("FOVData", FOVDataSchema);
 

@@ -22,7 +22,7 @@ exports.connectModelBackend = async function () {
     // Check if there is a response body and try parsing it
     if (text) {
       const data = JSON.parse(text);
-      console.log("Connected to the model backend:", data);
+      console.log("Connected to the model backend: ", data);
     } else {
       console.log("No response body from the model backend.");
     }

@@ -8,6 +8,17 @@ exports.postExpertResult = async function (body, params) {
     throw new Error("Examination ID is required");
   }
 
+  const { _id, finalGrading, bacteriaTotalCount, notes } = body;
+  if (!finalGrading) {
+    throw new Error("Final grading is required");
+  }
+  if (!bacteriaTotalCount === undefined) {
+    throw new Error("Bacteria total count is required");
+  }
+  if (!notes) {
+    throw new Error("Notes is required");
+  }
+
   const existingExamination = await Examination.findById(examinationId);
   if (!existingExamination) {
     throw new Error("Examination not found");
@@ -18,17 +29,6 @@ exports.postExpertResult = async function (body, params) {
   });
   if (!patient) {
     throw new Error("Patient not found");
-  }
-
-  const { _id, finalGrading, bacteriaTotalCount, notes } = body;
-  if (!finalGrading) {
-    throw new Error("Final grading is required");
-  }
-  if (!bacteriaTotalCount === undefined) {
-    throw new Error("Bacteria total count is required");
-  }
-  if (!notes) {
-    throw new Error("Notes is required");
   }
 
   const newExpertResultData = new ExpertExamResult({
@@ -42,8 +42,11 @@ exports.postExpertResult = async function (body, params) {
   existingExamination.expertResult = newExpertResultData._id;
   await existingExamination.save();
 
+  const expertResultResponse = newExpertResultData.toObject();
+  delete expertResultResponse.__v;
+
   return {
     message: "Expert result received successfully",
-    data: newExpertResultData,
+    data: expertResultResponse,
   };
 };

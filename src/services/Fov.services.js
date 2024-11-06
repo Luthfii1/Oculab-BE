@@ -19,7 +19,7 @@ exports.postFOVData = async function (params, body) {
   if (!order) {
     throw new Error("Order is required");
   }
-  if (systemCount === undefined) {
+  if (systemCount === undefined || !systemCount) {
     throw new Error("System count is required");
   }
   if (!confidenceLevel) {
@@ -52,8 +52,60 @@ exports.postFOVData = async function (params, body) {
   existingExamination.FOV.push(newFOVData._id);
   await existingExamination.save();
 
+  const FOVResponse = newFOVData.toObject();
+  delete FOVResponse.__v;
+
   return {
     message: "FOVData received successfully",
-    data: newFOVData,
+    data: FOVResponse,
+  };
+};
+
+exports.getAllFOVByExaminationId = async function (params) {
+  const { examinationId } = params;
+  if (!examinationId) {
+    throw new Error("Examination ID is required");
+  }
+
+  const examination = await Examination.findById(examinationId);
+  if (!examination) {
+    throw new Error("Examination not found");
+  }
+
+  if (examination.FOV.length === 0) {
+    return {
+      message: "FOVData received successfully",
+      data: {},
+    };
+  }
+
+  const allFovsId = examination.FOV;
+  const fovBta0 = [];
+  const fovBta1to9 = [];
+  const fovBtaAbove9 = [];
+
+  for (const fovId of allFovsId) {
+    const fov = await FOVData.findById(fovId);
+    const fovResponse = fov.toObject();
+    delete fovResponse.__v;
+
+    if (fovResponse.type === "BTA0") {
+      fovBta0.push(fovResponse);
+    } else if (fovResponse.type === "BTA1TO9") {
+      fovBta1to9.push(fovResponse);
+    } else {
+      fovBtaAbove9.push(fovResponse);
+    }
+  }
+
+  const responseData = {
+    BTA0: fovBta0,
+    BTA1TO9: fovBta1to9,
+    BTAABOVE9: fovBtaAbove9,
+  };
+
+  return {
+    message: "FOVData received successfully",
+    data: responseData,
   };
 };
