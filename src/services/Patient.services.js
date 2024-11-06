@@ -69,7 +69,7 @@ exports.createNewPatient = async function (body) {
 
 exports.updatePatient = async function (body, params) {
   const { patientId } = params;
-  if (!patientId) {
+  if (!patientId || patientId === ":patientId") {
     throw new Error("Patient ID is required");
   }
 
