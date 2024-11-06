@@ -45,6 +45,7 @@ exports.postSystemResult = async function (body, params) {
   await newSystemResultData.save();
 
   existingExamination.systemResult = newSystemResultData._id;
+  existingExamination.statusExamination = "NEEDVALIDATION";
   await existingExamination.save();
 
   const systemResultResponse = newSystemResultData.toObject();
