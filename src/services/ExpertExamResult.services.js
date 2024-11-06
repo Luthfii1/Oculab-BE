@@ -40,6 +40,7 @@ exports.postExpertResult = async function (body, params) {
   await newExpertResultData.save();
 
   existingExamination.expertResult = newExpertResultData._id;
+  existingExamination.statusExamination = "FINISHED";
   await existingExamination.save();
 
   const expertResultResponse = newExpertResultData.toObject();
