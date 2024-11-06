@@ -7,7 +7,7 @@ const assetsDir = path.join("/tmpPdf", "assets");
 // Check if the folder exists, if not, create it
 if (!fs.existsSync(assetsDir)) {
   console.log("Creating assets directory path:", assetsDir);
-  fs.mkdirSync(assetsDir, { recursive: true }); 
+  fs.mkdirSync(assetsDir, { recursive: true });
 }
 
 // Define file filter for PDF files only
