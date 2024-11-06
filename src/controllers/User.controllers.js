@@ -53,3 +53,12 @@ exports.getAllPics = async function (req, res) {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.updateUser = async function (req, res) {
+  try {
+    const result = await userServices.updateUser(req.body, req.params);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
