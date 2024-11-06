@@ -402,3 +402,52 @@ exports.getStatisticsTodoLab = async function (params) {
     data: statistics,
   };
 };
+
+exports.getMonthlyExaminations = async function (params) {
+  const { month, year } = params;
+
+  const DECIMAL_BASE = 10; // To avoid compatibility issues in different JavaScript environments
+  const FIRST_DAY_OF_MONTH = 1;
+
+  const monthNum = parseInt(month, DECIMAL_BASE);
+  const yearNum = parseInt(year, DECIMAL_BASE);
+
+  const startDate = new Date(yearNum, monthNum - 1, FIRST_DAY_OF_MONTH);
+  const endDate = new Date(yearNum, monthNum, FIRST_DAY_OF_MONTH);
+
+  try {
+    const examinations = await Examination.find({
+      examinationPlanDate: {
+        $gte: startDate,
+        $lt: endDate,
+      },
+    }).sort({ examinationPlanDate: 1 }); // Sort in ascending order
+
+    const responseData = [];
+
+    for (const examination of examinations) {
+      const patient = await Patient.findOne({
+        resultExamination: { $in: [examination._id] },
+      });
+
+      if (patient) {
+        responseData.push({
+          examinationId: examination._id,
+          slideId: examination.slideId,
+          statusExamination: examination.statusExamination,
+          patientId: patient._id,
+          patientName: patient.name,
+          patientDoB: patient.DoB,
+          examinationPlanDate: examination.examinationPlanDate,
+        });
+      }
+    }
+
+    return {
+      message: "Examination data received successfully",
+      data: responseData,
+    };
+  } catch (error) {
+    throw new Error("Failed to fetch monthly examinations");
+  }
+};

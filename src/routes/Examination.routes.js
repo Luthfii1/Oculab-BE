@@ -33,5 +33,9 @@ router.get(
   "/get-statistics-todo-lab/:userId",
   examinationControllers.getStatisticsTodoLab
 );
+router.get(
+  "/get-monthly-examinations/:month/:year",
+  examinationControllers.getMonthlyExaminations
+);
 
 module.exports = router;

@@ -80,3 +80,12 @@ exports.getStatisticsTodoLab = async function (req, res) {
     res.status(500).send({ message: error.message });
   }
 };
+
+exports.getMonthlyExaminations = async function (req, res) {
+  try {
+    const result = await ExaminationService.getMonthlyExaminations(req.params);
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
