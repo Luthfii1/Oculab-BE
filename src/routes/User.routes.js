@@ -15,7 +15,6 @@ router.post(
   authenticateRefreshToken,
   userControllers.refreshToken
 );
-
 router.get(
   "/get-all-user-data",
   authenticateToken,
@@ -23,5 +22,6 @@ router.get(
   userControllers.getAllUsers
 );
 router.get("/get-user-data-by-id/:userId", userControllers.getUserById);
+router.get("/get-all-pics", userControllers.getAllPics);
 
 module.exports = router;
