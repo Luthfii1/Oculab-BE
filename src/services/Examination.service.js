@@ -313,6 +313,9 @@ exports.forwardVideoToML = async function (file, params) {
       throw new Error(`Failed to forward video to ML service: ${errorText}`);
     }
 
+    examination.statusExamination = "INPROGRESS";
+    await examination.save();
+
     const result = await response.json();
 
     fs.unlink(videoFilePath, (err) => {
