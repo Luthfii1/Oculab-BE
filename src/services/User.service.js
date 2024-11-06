@@ -149,3 +149,40 @@ exports.getAllPics = async function () {
     data: pics,
   };
 };
+
+exports.updateUser = async function (body, params) {
+  const { userId } = params;
+  if (!userId || userId === ":userId") {
+    throw new Error("User ID is required");
+  }
+
+  const { name, role, email, password } = body;
+
+  const existingUser = await User.findById(userId);
+  if (!existingUser) {
+    throw new Error("User not found");
+  }
+
+  if (name) {
+    existingUser.name = name;
+  }
+  if (role) {
+    existingUser.role = role;
+  }
+  if (email) {
+    existingUser.email = email;
+  }
+  if (password) {
+    existingUser.password = hashPassword(password);
+  }
+
+  await existingUser.save();
+  const userResponse = existingUser.toObject();
+  delete userResponse.password;
+  delete userResponse.__v;
+
+  return {
+    message: "User data updated successfully",
+    data: userResponse,
+  };
+};
