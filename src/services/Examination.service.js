@@ -134,54 +134,54 @@ exports.getExaminationsByUser = async function (params) {
   };
 };
 
-// exports.updateExaminationResult = async function (params, body) {
-//   const { patientId, examinationId } = params;
-//   if (!patientId || patientId === ":patientId") {
-//     throw new Error("Patient ID is required");
-//   }
-//   if (!examinationId || examinationId === ":examinationId") {
-//     throw new Error("Examination ID is required");
-//   }
+exports.updateExaminationResult = async function (params, body) {
+  const { patientId, examinationId } = params;
+  if (!patientId || patientId === ":patientId") {
+    throw new Error("Patient ID is required");
+  }
+  if (!examinationId || examinationId === ":examinationId") {
+    throw new Error("Examination ID is required");
+  }
 
-//   const { examination } = body;
-//   if (!examination) {
-//     throw new Error("Examination data is required");
-//   }
+  const { examination } = body;
+  if (!examination) {
+    throw new Error("Examination data is required");
+  }
 
-//   const patient = await Patient.findById(patientId);
-//   if (!patient) {
-//     throw new Error("Patient not found");
-//   }
+  const patient = await Patient.findById(patientId);
+  if (!patient) {
+    throw new Error("Patient not found");
+  }
 
-//   const examinationToUpdate = await Examination.findById(examinationId);
-//   if (!examinationToUpdate) {
-//     throw new Error("Examination not found");
-//   }
+  const examinationToUpdate = await Examination.findById(examinationId);
+  if (!examinationToUpdate) {
+    throw new Error("Examination not found");
+  }
 
-//   // update the examination data with the updated data
-//   for (const [key, value] of Object.entries(examination)) {
-//     examinationToUpdate[key] = value;
-//   }
+  // update the examination data with the updated data
+  for (const [key, value] of Object.entries(examination)) {
+    examinationToUpdate[key] = value;
+  }
 
-//   await examinationToUpdate.save();
+  await examinationToUpdate.save();
 
-//   // update the patient data with the updated examination data by examinationId and patientId
-//   await Patient.updateOne(
-//     { _id: patientId, "resultExamination._id": examinationId },
-//     {
-//       $set: {
-//         "resultExamination.$": examinationToUpdate,
-//       },
-//     }
-//   );
+  // update the patient data with the updated examination data by examinationId and patientId
+  await Patient.updateOne(
+    { _id: patientId, "resultExamination._id": examinationId },
+    {
+      $set: {
+        "resultExamination.$": examinationToUpdate,
+      },
+    }
+  );
 
-//   return {
-//     message: "Successfully to updated the examination data",
-//     data: {
-//       examination: patient.resultExamination,
-//     },
-//   };
-// };
+  return {
+    message: "Successfully to updated the examination data",
+    data: {
+      examination: patient.resultExamination,
+    },
+  };
+};
 
 exports.getExaminationById = async function (params) {
   const { examinationId } = params;
@@ -447,44 +447,37 @@ exports.getMonthlyExaminations = async function (params) {
   const startDate = new Date(yearNum, monthNum - 1, FIRST_DAY_OF_MONTH);
   const endDate = new Date(yearNum, monthNum, FIRST_DAY_OF_MONTH);
 
-  try {
-    const examinations = await Examination.find({
-      examinationDate: {
-        $gte: startDate,
-        $lt: endDate,
-      },
-    }).sort({ examinationDate: 1 }); // Sort in ascending order
+  const examinations = await Examination.find({
+    examinationDate: {
+      $gte: startDate,
+      $lt: endDate,
+    },
+  }).sort({ examinationDate: 1 }); // Sort in ascending order
 
-    const responseData = [];
+  const responseData = [];
 
-    for (const examination of examinations) {
-      const patient = await Patient.findOne({
-        resultExamination: { $in: [examination._id] },
-      });
-
-      if (patient) {
-        responseData.push({
-          examinationId: examination._id,
-          slideId: examination.slideId,
-          statusExamination: examination.statusExamination,
-          patientId: patient._id,
-          patientName: patient.name,
-          patientDoB: patient.DoB,
-          examinationDate: examination.examinationDate,
-        });
-      }
-    }
-
-    return {
-      message: "Examination data received successfully",
-      data: {
-        examination: responseData,
-      },
-    };
-  } catch (error) {
-    throw new Error({
-      message: "Failed to fetch monthly examinations",
-      description: error,
+  for (const examination of examinations) {
+    const patient = await Patient.findOne({
+      resultExamination: { $in: [examination._id] },
     });
+
+    if (patient) {
+      responseData.push({
+        examinationId: examination._id,
+        slideId: examination.slideId,
+        statusExamination: examination.statusExamination,
+        patientId: patient._id,
+        patientName: patient.name,
+        patientDoB: patient.DoB,
+        examinationDate: examination.examinationDate,
+      });
+    }
   }
+
+  return {
+    message: "Examination data received successfully",
+    data: {
+      examination: responseData,
+    },
+  };
 };
