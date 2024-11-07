@@ -143,10 +143,7 @@ exports.getAllPics = async function () {
     return userObj;
   });
 
-  return {
-    message: "All users data received successfully",
-    data: pics,
-  };
+  return pics;
 };
 
 exports.updateUser = async function (body, params) {
