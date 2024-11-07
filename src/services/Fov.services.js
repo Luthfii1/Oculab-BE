@@ -4,7 +4,7 @@ const { Patient } = require("../models/Entity/Patient.models");
 
 exports.postFOVData = async function (params, body) {
   const { examinationId } = params;
-  if (!examinationId) {
+  if (!examinationId || examinationId === ":examinationId") {
     throw new Error("Examination ID is required");
   }
 
@@ -38,6 +38,11 @@ exports.postFOVData = async function (params, body) {
     throw new Error("Patient not found");
   }
 
+  const existingFOVData = await FOVData.findById(_id);
+  if (existingFOVData) {
+    throw new Error("Duplicate ID");
+  }
+
   const newFOVData = new FOVData({
     _id,
     image,
@@ -55,10 +60,7 @@ exports.postFOVData = async function (params, body) {
   const FOVResponse = newFOVData.toObject();
   delete FOVResponse.__v;
 
-  return {
-    message: "FOVData received successfully",
-    data: FOVResponse,
-  };
+  return FOVResponse;
 };
 
 exports.getAllFOVByExaminationId = async function (params) {
