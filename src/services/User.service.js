@@ -177,8 +177,5 @@ exports.updateUser = async function (body, params) {
   delete userResponse.password;
   delete userResponse.__v;
 
-  return {
-    message: "User data updated successfully",
-    data: userResponse,
-  };
+  return userResponse;
 };

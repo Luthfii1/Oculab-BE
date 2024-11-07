@@ -318,8 +318,49 @@ exports.getAllPics = async function (req, res) {
 exports.updateUser = async function (req, res) {
   try {
     const result = await userServices.updateUser(req.body, req.params);
-    res.status(200).json(result);
+
+    sendResponse(
+      res,
+      ResponseType.SUCCESS,
+      200,
+      "User updated successfully",
+      result
+    );
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    switch (error.message) {
+      case "User ID is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "User ID is required"
+        );
+        break;
+      case "User not found":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.RESOURCE_NOT_FOUND,
+          "User not found"
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          error.message,
+          null,
+          ErrorResponseType.INTERNAL_VALIDATION_ERROR,
+          error.message
+        );
+        break;
+    }
   }
 };
