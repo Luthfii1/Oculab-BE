@@ -66,9 +66,63 @@ exports.login = async function (req, res) {
 exports.register = async function (req, res) {
   try {
     const result = await userServices.register(req.body);
-    res.status(200).json(result);
+    sendResponse(
+      res,
+      ResponseType.SUCCESS,
+      201,
+      "User registered successfully",
+      result
+    );
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    switch (error.message) {
+      case "Name is required":
+      case "Role is required":
+      case "Email is required":
+      case "Password is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The request body is missing the required field."
+        );
+        break;
+      case "User already exists":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          409,
+          error.message,
+          null,
+          ErrorResponseType.CONFLICT_ERROR,
+          "User already exists"
+        );
+        break;
+      case "Duplicate ID":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          409,
+          error.message,
+          null,
+          ErrorResponseType.CONFLICT_ERROR,
+          "The user ID provided already exists."
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          error.message,
+          null,
+          ErrorResponseType.INTERNAL_VALIDATION_ERROR,
+          error.message
+        );
+        break;
+    }
   }
 };
 

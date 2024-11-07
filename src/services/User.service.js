@@ -27,7 +27,7 @@ exports.login = async function (body) {
   const response = {
     accessToken,
     refreshToken,
-  }
+  };
 
   return response;
 };
@@ -54,6 +54,11 @@ exports.register = async function (body) {
 
   const hashedPassword = hashPassword(password);
 
+  const isIdDuplicate = await User.findById(_id);
+  if (isIdDuplicate) {
+    throw new Error("Duplicate ID");
+  }
+
   const newUser = new User({
     _id: _id,
     name: name,
@@ -66,7 +71,7 @@ exports.register = async function (body) {
   const response = newUser.toObject();
   delete response.__v;
 
-  return { message: "User registered successfully", data: response };
+  return response;
 };
 
 exports.refreshToken = async function (body, params) {
