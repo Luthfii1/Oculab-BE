@@ -65,7 +65,7 @@ exports.postFOVData = async function (params, body) {
 
 exports.getAllFOVByExaminationId = async function (params) {
   const { examinationId } = params;
-  if (!examinationId) {
+  if (!examinationId || examinationId === ":examinationId") {
     throw new Error("Examination ID is required");
   }
 
@@ -75,10 +75,7 @@ exports.getAllFOVByExaminationId = async function (params) {
   }
 
   if (examination.FOV.length === 0) {
-    return {
-      message: "FOVData received successfully",
-      data: {},
-    };
+    return {};
   }
 
   const allFovsId = examination.FOV;
@@ -106,8 +103,5 @@ exports.getAllFOVByExaminationId = async function (params) {
     BTAABOVE9: fovBtaAbove9,
   };
 
-  return {
-    message: "FOVData received successfully",
-    data: responseData,
-  };
+  return responseData
 };
