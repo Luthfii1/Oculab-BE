@@ -52,7 +52,7 @@ exports.postSystemResult = async function (req, res) {
       sendResponse(
         res,
         ResponseType.ERROR,
-        400,
+        409,
         error.message,
         null,
         ErrorResponseType.CONFLICT_ERROR,
