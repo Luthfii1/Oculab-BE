@@ -4,7 +4,7 @@ const { Patient } = require("../models/Entity/Patient.models");
 
 exports.postExpertResult = async function (body, params) {
   const { examinationId } = params;
-  if (!examinationId) {
+  if (!examinationId || examinationId === ":examinationId") {
     throw new Error("Examination ID is required");
   }
 
@@ -12,7 +12,7 @@ exports.postExpertResult = async function (body, params) {
   if (!finalGrading) {
     throw new Error("Final grading is required");
   }
-  if (!bacteriaTotalCount === undefined) {
+  if ((!bacteriaTotalCount, bacteriaTotalCount === undefined)) {
     throw new Error("Bacteria total count is required");
   }
   if (!notes) {
@@ -31,6 +31,11 @@ exports.postExpertResult = async function (body, params) {
     throw new Error("Patient not found");
   }
 
+  const existingExpertResult = await ExpertExamResult.findById(_id);
+  if (existingExpertResult) {
+    throw new Error("Duplicate ID");
+  }
+
   const newExpertResultData = new ExpertExamResult({
     _id,
     finalGrading,
@@ -46,8 +51,5 @@ exports.postExpertResult = async function (body, params) {
   const expertResultResponse = newExpertResultData.toObject();
   delete expertResultResponse.__v;
 
-  return {
-    message: "Expert result received successfully",
-    data: expertResultResponse,
-  };
+  return expertResultResponse;
 };
