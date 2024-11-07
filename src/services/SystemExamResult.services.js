@@ -4,7 +4,7 @@ const { Patient } = require("../models/Entity/Patient.models");
 
 exports.postSystemResult = async function (body, params) {
   const { examinationId } = params;
-  if (!examinationId) {
+  if (!examinationId || examinationId == ":examinationId") {
     throw new Error("Examination ID is required");
   }
 
@@ -36,6 +36,12 @@ exports.postSystemResult = async function (body, params) {
     throw new Error("System bacteria total count is required");
   }
 
+  // throw error when duplicate _id
+  const existingId = await SystemExamResult.findById(_id);
+  if (existingId) {
+    throw new Error(`Duplicate ID`);
+  }
+
   const newSystemResultData = new SystemExamResult({
     _id,
     systemGrading,
@@ -51,8 +57,5 @@ exports.postSystemResult = async function (body, params) {
   const systemResultResponse = newSystemResultData.toObject();
   delete systemResultResponse.__v;
 
-  return {
-    message: "System result received successfully",
-    data: systemResultResponse,
-  };
+  return systemResultResponse;
 };
