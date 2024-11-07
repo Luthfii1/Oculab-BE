@@ -31,7 +31,7 @@ exports.postSystemResult = async function (req, res) {
     } else if (error.message === "Examination not found") {
       sendResponse(
         res,
-        "error",
+        ResponseType.ERROR,
         404,
         error.message,
         null,
@@ -41,7 +41,7 @@ exports.postSystemResult = async function (req, res) {
     } else if (error.message === "Patient not found") {
       sendResponse(
         res,
-        "error",
+        ResponseType.ERROR,
         404,
         error.message,
         null,
@@ -51,7 +51,7 @@ exports.postSystemResult = async function (req, res) {
     } else if (error.message === "Duplicate ID") {
       sendResponse(
         res,
-        "error",
+        ResponseType.ERROR,
         400,
         error.message,
         null,
@@ -59,10 +59,9 @@ exports.postSystemResult = async function (req, res) {
         "The system result ID provided already exists."
       );
     } else {
-      // Default to internal server error for unexpected errors
       sendResponse(
         res,
-        "error",
+        ResponseType.ERROR,
         500,
         "Internal server error",
         null,
