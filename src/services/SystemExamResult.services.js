@@ -51,8 +51,5 @@ exports.postSystemResult = async function (body, params) {
   const systemResultResponse = newSystemResultData.toObject();
   delete systemResultResponse.__v;
 
-  return {
-    message: "System result received successfully",
-    data: systemResultResponse,
-  };
+  return systemResultResponse;
 };
