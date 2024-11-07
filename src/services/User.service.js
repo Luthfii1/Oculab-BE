@@ -7,7 +7,6 @@ const { hashPassword } = require("../utils/PasswordUtilities");
 
 exports.login = async function (body) {
   const { email, password } = body;
-
   if (!email || !password) {
     throw new Error("Email and password are required");
   }
@@ -25,10 +24,12 @@ exports.login = async function (body) {
   const accessToken = generateAccessToken(existingUser);
   const refreshToken = generateRefreshToken(existingUser);
 
-  return {
-    message: "Token generated successfully",
-    data: { accessToken, refreshToken },
-  };
+  const response = {
+    accessToken,
+    refreshToken,
+  }
+
+  return response;
 };
 
 exports.register = async function (body) {
