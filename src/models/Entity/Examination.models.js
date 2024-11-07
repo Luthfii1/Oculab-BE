@@ -33,6 +33,10 @@ const ExaminationSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    PDF: {
+      type: String,
+      required: false,
+    },
     examinationDate: {
       type: Date,
       required: true,
