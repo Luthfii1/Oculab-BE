@@ -129,27 +129,150 @@ exports.register = async function (req, res) {
 exports.refreshToken = async function (req, res) {
   try {
     const result = await userServices.refreshToken(req.body, req.params);
-    res.status(200).json(result);
+    sendResponse(
+      res,
+      ResponseType.SUCCESS,
+      200,
+      "Token refreshed successfully",
+      result
+    );
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    switch (error.message) {
+      case "User ID is required":
+      case "Token ID is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The request is missing the required field."
+        );
+        break;
+      case "token and id is not valid":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          401,
+          error.message,
+          null,
+          ErrorResponseType.PERMISSION_ERROR,
+          "Token and ID is not valid"
+        );
+        break;
+      case "User not found":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.RESOURCE_NOT_FOUND,
+          "User not found"
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          error.message,
+          null,
+          ErrorResponseType.INTERNAL_VALIDATION_ERROR,
+          error.message
+        );
+        break;
+    }
   }
 };
 
 exports.getAllUsers = async function (req, res) {
   try {
     const result = await userServices.getAllUsers();
-    res.status(200).json(result);
+
+    sendResponse(
+      res,
+      ResponseType.SUCCESS,
+      200,
+      "All users received successfully",
+      result
+    );
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    switch (error.message) {
+      case "User not found":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.RESOURCE_NOT_FOUND,
+          "User not found"
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          error.message,
+          null,
+          ErrorResponseType.INTERNAL_VALIDATION_ERROR,
+          error.message
+        );
+        break;
+    }
   }
 };
 
 exports.getUserById = async function (req, res) {
   try {
     const result = await userServices.getUserById(req.params);
-    res.status(200).json(result);
+
+    sendResponse(
+      res,
+      ResponseType.SUCCESS,
+      200,
+      "User received successfully",
+      result
+    );
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    switch (error.message) {
+      case "User ID is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "User ID is required"
+        );
+        break;
+      case "User not found":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.RESOURCE_NOT_FOUND,
+          "User not found"
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          error.message,
+          null,
+          ErrorResponseType.INTERNAL_VALIDATION_ERROR,
+          error.message
+        );
+        break;
+    }
   }
 };
 

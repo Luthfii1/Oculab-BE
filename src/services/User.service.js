@@ -27,6 +27,7 @@ exports.login = async function (body) {
   const response = {
     accessToken,
     refreshToken,
+    userId: existingUser._id,
   };
 
   return response;
@@ -76,13 +77,13 @@ exports.register = async function (body) {
 
 exports.refreshToken = async function (body, params) {
   const { userId } = params;
-  if (!userId) {
+  if (!userId || userId === ":userId") {
     throw new Error("User ID is required");
   }
 
   const { tokenUserId } = body;
   if (!tokenUserId) {
-    throw new Error("User ID is required");
+    throw new Error("Token ID is required");
   }
 
   const isVerify = userId == tokenUserId;
@@ -97,10 +98,7 @@ exports.refreshToken = async function (body, params) {
 
   const newToken = generateAccessToken(user);
 
-  return {
-    message: "User token refreshed",
-    data: newToken,
-  };
+  return { accessToken: newToken };
 };
 
 exports.getAllUsers = async function () {
@@ -109,10 +107,7 @@ exports.getAllUsers = async function () {
     throw new Error("User not found");
   }
 
-  return {
-    message: "All users data received successfully",
-    data: existingUser,
-  };
+  return existingUser;
 };
 
 exports.getUserById = async function (params) {
@@ -128,11 +123,9 @@ exports.getUserById = async function (params) {
 
   const userResponse = user.toObject();
   delete userResponse.password;
+  delete userResponse.__v;
 
-  return {
-    message: "User data received successfully",
-    data: user,
-  };
+  return userResponse;
 };
 
 exports.getAllPics = async function () {
