@@ -367,7 +367,9 @@ exports.getAllExaminations = async function () {
       resultExamination: { $in: [examination._id] },
     });
 
-    if (patient) {
+    const pic = await User.findById(examination.PIC);
+
+    if (patient && pic) {
       responseData.push({
         examinationId: examination._id,
         slideId: examination.slideId,
@@ -376,6 +378,8 @@ exports.getAllExaminations = async function () {
         patientName: patient.name,
         patientDoB: patient.DoB,
         examinationPlanDate: examination.examinationPlanDate,
+        picId: pic._id,
+        picName: pic.name,
       });
     }
   }
