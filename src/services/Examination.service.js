@@ -109,9 +109,7 @@ exports.createExamination = async function (params, body) {
 
   return {
     message: "Examination data received successfully",
-    data: {
-      examination: responseData,
-    },
+    data: responseData,
   };
 };
 
@@ -128,9 +126,7 @@ exports.getExaminationsByUser = async function (params) {
 
   return {
     message: "Examination data received successfully",
-    data: {
-      examination: patient.resultExamination,
-    },
+    data: resultExamination,
   };
 };
 
@@ -177,9 +173,7 @@ exports.updateExaminationResult = async function (params, body) {
 
   return {
     message: "Successfully to updated the examination data",
-    data: {
-      examination: patient.resultExamination,
-    },
+    data: resultExamination,
   };
 };
 
@@ -235,9 +229,7 @@ exports.getExaminationById = async function (params) {
 
   return {
     message: "Examination data received successfully",
-    data: {
-      examination: responseData,
-    },
+    data: responseData,
   };
 };
 
@@ -274,9 +266,7 @@ exports.getNumberOfExaminations = async function () {
 
   return {
     message: "Number of examinations received successfully",
-    data: {
-      numberOfExaminations: numberOfExaminations,
-    },
+    data: numberOfExaminations,
   };
 };
 
@@ -345,9 +335,7 @@ exports.forwardVideoToML = async function (file, params) {
 
     return {
       message: "Video forwarded to ML service successfully",
-      data: {
-        video: result,
-      },
+      data: result,
     };
   } catch (error) {
     console.error("Error occurred:", error);
@@ -394,9 +382,7 @@ exports.getAllExaminations = async function () {
 
   return {
     message: "Examination data received successfully",
-    data: {
-      examination: responseData,
-    },
+    data: responseData,
   };
 };
 
@@ -423,9 +409,7 @@ exports.getStatisticsTodoLab = async function (params) {
 
   return {
     message: "Statistics data received successfully",
-    data: {
-      statistics: statistics,
-    },
+    data: statistics,
   };
 };
 
@@ -476,8 +460,6 @@ exports.getMonthlyExaminations = async function (params) {
 
   return {
     message: "Examination data received successfully",
-    data: {
-      examination: responseData,
-    },
+    data: responseData,
   };
 };
