@@ -60,9 +60,7 @@ exports.createNewPatient = async function (body) {
 
   return {
     message: "Patient data received successfully",
-    data: {
-      patient: newPatient,
-    },
+    data: newPatient,
   };
 };
 
@@ -115,9 +113,7 @@ exports.updatePatient = async function (body, params) {
   if (!changesDetected) {
     return {
       message: "No changes detected in patient data",
-      data: {
-        patient: existingPatient,
-      },
+      data: existingPatient,
     };
   }
 
@@ -125,9 +121,7 @@ exports.updatePatient = async function (body, params) {
 
   return {
     message: "Patient data updated successfully",
-    data: {
-      patient: existingPatient,
-    },
+    data: existingPatient,
   };
 };
 
@@ -143,9 +137,7 @@ exports.getAllPatients = async function () {
 
   return {
     message: "Patient data received successfully",
-    data: {
-      patient: patientsResponse,
-    },
+    data: patientsResponse,
   };
 };
 
@@ -165,9 +157,7 @@ exports.getPatientById = async function (params) {
 
   return {
     message: "Patient data received successfully",
-    data: {
-      patient: patientWithoutResultExamination,
-    },
+    data: patientWithoutResultExamination,
   };
 };
 
@@ -198,8 +188,6 @@ exports.getAllPatientsByName = async function (params) {
 
   return {
     message: "Patient data received successfully",
-    data: {
-      patient: patientsResponse,
-    },
+    data: patientsResponse,
   };
 };
