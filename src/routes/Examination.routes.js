@@ -24,7 +24,7 @@ router.get(
   examinationControllers.getNumberOfExaminations
 );
 router.post(
-  "/forward-video-to-ml/:patientId/:examinationId",
+  "/forward-video-to-ml/:examinationId",
   uploadVideo.single("video"),
   examinationControllers.forwardVideoToML
 );
