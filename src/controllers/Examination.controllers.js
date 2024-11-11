@@ -243,7 +243,6 @@ exports.forwardVideoToML = async function (req, res) {
   } catch (error) {
     switch (error.message) {
       case "Examination ID is required":
-      case "Patient ID is required":
         sendResponse(
           res,
           ResponseType.ERROR,
@@ -255,7 +254,6 @@ exports.forwardVideoToML = async function (req, res) {
         );
         break;
       case "Examination not found":
-      case "Patient not found":
         sendResponse(
           res,
           ResponseType.ERROR,

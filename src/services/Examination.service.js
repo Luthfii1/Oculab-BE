@@ -271,11 +271,8 @@ exports.getNumberOfExaminations = async function () {
 };
 
 exports.forwardVideoToML = async function (file, params) {
-  const { patientId, examinationId } = params;
+  const { examinationId } = params;
 
-  if (!patientId || patientId === ":patientId") {
-    throw new Error("Patient ID is required");
-  }
   if (!examinationId || examinationId === ":examinationId") {
     throw new Error("Examination ID is required");
   }
@@ -287,17 +284,12 @@ exports.forwardVideoToML = async function (file, params) {
       throw new Error("Video file is required");
     }
 
-    const patient = await Patient.findById(patientId);
-    if (!patient) {
-      throw new Error("Patient not found");
-    }
-
     const examination = await Examination.findById(examinationId);
     if (!examination) {
       throw new Error("Examination not found");
     }
 
-    const url = URL_EXTRACT_VIDEO + "/" + patientId + "/" + examinationId;
+    const url = URL_EXTRACT_VIDEO + "/" + examinationId;
     const formData = new FormData();
     formData.append("video", fs.createReadStream(videoFilePath), {
       filename: file.originalname,
