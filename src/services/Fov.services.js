@@ -90,7 +90,7 @@ exports.getAllFOVByExaminationId = async function (params) {
 
     if (fovResponse.systemCount === 0) {
       fovBta0.push(fovResponse);
-    } else if (fovResponse.type === "1-9 BTA") {
+    } else if (fovResponse.systemCount >= 1 && fovResponse.systemCount <= 9) {
       fovBta1to9.push(fovResponse);
     } else {
       fovBtaAbove9.push(fovResponse);
