@@ -289,7 +289,7 @@ exports.forwardVideoToML = async function (file, params) {
       throw new Error("Examination not found");
     }
 
-    const url = URL_EXTRACT_VIDEO + "/" + patientId + "/" + examinationId;
+    const url = URL_EXTRACT_VIDEO + "/" + examinationId;
     const formData = new FormData();
     formData.append("video", fs.createReadStream(videoFilePath), {
       filename: file.originalname,
