@@ -88,9 +88,9 @@ exports.getAllFOVByExaminationId = async function (params) {
     const fovResponse = fov.toObject();
     delete fovResponse.__v;
 
-    if (fovResponse.type === "BTA0") {
+    if (fovResponse.systemCount === 0) {
       fovBta0.push(fovResponse);
-    } else if (fovResponse.type === "BTA1TO9") {
+    } else if (fovResponse.type === "1-9 BTA") {
       fovBta1to9.push(fovResponse);
     } else {
       fovBtaAbove9.push(fovResponse);
