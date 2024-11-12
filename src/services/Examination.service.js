@@ -196,12 +196,14 @@ exports.getExaminationById = async function (params) {
   const PICResponse = PIC.toObject();
   delete PICResponse.__v;
   delete PICResponse.password;
+  delete PICResponse.accessPin;
   responseData.PIC = PICResponse;
 
   const DPJP = await User.findById(examination.DPJP);
   const DPJPResponse = DPJP.toObject();
   delete DPJPResponse.__v;
   delete DPJPResponse.password;
+  delete DPJPResponse.accessPin;
   responseData.DPJP = DPJPResponse;
 
   if (examination.systemResult) {
