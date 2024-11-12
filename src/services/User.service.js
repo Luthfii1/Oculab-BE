@@ -34,7 +34,7 @@ exports.login = async function (body) {
 };
 
 exports.register = async function (body) {
-  const { _id, name, role, email, password } = body;
+  const { _id, name, role, email, password, accessPin } = body;
   if (!name) {
     throw new Error("Name is required");
   }
@@ -66,6 +66,7 @@ exports.register = async function (body) {
     role: role,
     email: email,
     password: hashedPassword,
+    accessPin: accessPin,
   });
   await newUser.save();
 
@@ -123,6 +124,7 @@ exports.getUserById = async function (params) {
 
   const userResponse = user.toObject();
   delete userResponse.password;
+  delete userResponse.accessPin;
   delete userResponse.__v;
 
   return userResponse;
@@ -139,6 +141,7 @@ exports.getAllPics = async function () {
     delete userObj.password;
     delete userObj.__v;
     delete userObj.email;
+    delete userObj.accessPin;
 
     return userObj;
   });
@@ -152,7 +155,7 @@ exports.updateUser = async function (body, params) {
     throw new Error("User ID is required");
   }
 
-  const { name, role, email, password } = body;
+  const { name, role, email, password, accessPin } = body;
 
   const existingUser = await User.findById(userId);
   if (!existingUser) {
@@ -171,10 +174,14 @@ exports.updateUser = async function (body, params) {
   if (password) {
     existingUser.password = hashPassword(password);
   }
+  if (accessPin) {
+    existingUser.accessPin = accessPin;
+  }
 
   await existingUser.save();
   const userResponse = existingUser.toObject();
   delete userResponse.password;
+  delete userResponse.accessPin;
   delete userResponse.__v;
 
   return userResponse;
