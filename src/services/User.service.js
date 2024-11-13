@@ -124,7 +124,6 @@ exports.getUserById = async function (params) {
 
   const userResponse = user.toObject();
   delete userResponse.password;
-  delete userResponse.accessPin;
   delete userResponse.__v;
 
   return userResponse;
