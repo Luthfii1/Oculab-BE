@@ -1,6 +1,7 @@
 const { SystemExamResult } = require("../models/Entity/SystemExamResult.model");
 const { Examination } = require("../models/Entity/Examination.models");
 const { Patient } = require("../models/Entity/Patient.models");
+const { FOVData } = require("../models/Entity/FOVData.models");
 
 exports.postSystemResult = async function (body, params) {
   const { examinationId } = params;
@@ -52,6 +53,19 @@ exports.postSystemResult = async function (body, params) {
 
   existingExamination.systemResult = newSystemResultData._id;
   existingExamination.statusExamination = "NEEDVALIDATION";
+
+  //want to add one of fov image to examination imagePreview
+  const existingFOVId = existingExamination.FOV[0];
+  if (!existingFOVId) {
+    throw new Error("FOV Data has not been posted yet");
+  }
+  const existingFOVData = await FOVData.findById(existingFOVId);
+  if (!existingFOVData) {
+    throw new Error("FOV Data not found");
+  }
+  const imageInFOVData = existingFOVData.image;
+  existingExamination.imagePreview = imageInFOVData;
+
   await existingExamination.save();
 
   const systemResultResponse = newSystemResultData.toObject();
