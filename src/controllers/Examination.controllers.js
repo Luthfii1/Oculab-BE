@@ -28,7 +28,7 @@ exports.createExamination = async function (req, res) {
           error.message,
           null,
           ErrorResponseType.VALIDATION_ERROR,
-          "The request is missing the required patient's ID."
+          "The request is missing the required data."
         );
         break;
       case "Patient not found":
@@ -51,7 +51,7 @@ exports.createExamination = async function (req, res) {
           error.message,
           null,
           ErrorResponseType.CONFLICT_ERROR,
-          "The provided examination ID already exists."
+          "The provided data already exists."
         );
         break;
       case "No matching PIC or Lab Technician found for the provided ID":
@@ -63,7 +63,7 @@ exports.createExamination = async function (req, res) {
           error.message,
           null,
           ErrorResponseType.VALIDATION_ERROR,
-          "No matching PIC or Lab Technician found for the provided ID."
+          "No matching staff found for the provided ID."
         );
         break;
       default:
@@ -143,7 +143,7 @@ exports.updateExaminationResult = async function (req, res) {
           error.message,
           null,
           ErrorResponseType.VALIDATION_ERROR,
-          "The request is missing the required patient's ID."
+          "The request is missing the required data"
         );
         break;
       case "Patient not found":
@@ -155,7 +155,7 @@ exports.updateExaminationResult = async function (req, res) {
           error.message,
           null,
           ErrorResponseType.VALIDATION_ERROR,
-          "No patient found with the provided patient ID."
+          "No data found with the provided ID."
         );
         break;
       default:
@@ -251,7 +251,7 @@ exports.forwardVideoToML = async function (req, res) {
           error.message,
           null,
           ErrorResponseType.VALIDATION_ERROR,
-          "The request is missing the required examination ID."
+          "The request is missing the required ID."
         );
         break;
       case "Examination not found":
@@ -263,7 +263,7 @@ exports.forwardVideoToML = async function (req, res) {
           error.message,
           null,
           ErrorResponseType.VALIDATION_ERROR,
-          "No examination found with the provided examination ID."
+          "No data found with the provided ID."
         );
         break;
       case "Failed to forward video to ML":

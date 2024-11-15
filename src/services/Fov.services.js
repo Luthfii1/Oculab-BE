@@ -19,7 +19,7 @@ exports.postFOVData = async function (params, body) {
   if (!order) {
     throw new Error("Order is required");
   }
-  if (systemCount === undefined || !systemCount) {
+  if (systemCount === undefined) {
     throw new Error("System count is required");
   }
   if (!confidenceLevel) {
@@ -103,5 +103,5 @@ exports.getAllFOVByExaminationId = async function (params) {
     BTAABOVE9: fovBtaAbove9,
   };
 
-  return responseData
+  return responseData;
 };

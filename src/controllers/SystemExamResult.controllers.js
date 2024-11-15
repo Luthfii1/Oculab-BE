@@ -58,6 +58,26 @@ exports.postSystemResult = async function (req, res) {
         ErrorResponseType.CONFLICT_ERROR,
         "The system result ID provided already exists."
       );
+    } else if (error.message === "FOV Data has not been posted yet") {
+      sendResponse(
+        res,
+        ResponseType.ERROR,
+        404,
+        error.message,
+        null,
+        ErrorResponseType.CONFLICT_ERROR,
+        "No FOV ID found for the provided examination"
+      );
+    } else if (error.message === "FOV Data not found") {
+      sendResponse(
+        res,
+        ResponseType.ERROR,
+        404,
+        error.message,
+        null,
+        ErrorResponseType.CONFLICT_ERROR,
+        "No FOVData found"
+      );
     } else {
       sendResponse(
         res,
