@@ -59,6 +59,52 @@ exports.updateUser = async function (req, res) {
     const result = await userServices.updateUser(req.body, req.params);
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    switch (error.message) {
+      case "User ID is required":
+      case "Previous password is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          error.message
+        );
+        break;
+      case "User not found":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.RESOURCE_NOT_FOUND,
+          "User not found"
+        );
+        break;
+      case "Incorrect previous password":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          401,
+          error.message,
+          null,
+          ErrorResponseType.PERMISSION_ERROR,
+          "Incorrect previous password"
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          error.message,
+          null,
+          ErrorResponseType.INTERNAL_VALIDATION_ERROR,
+          error.message
+        );
+        break;
+    }
   }
 };

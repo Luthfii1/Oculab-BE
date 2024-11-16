@@ -156,7 +156,7 @@ exports.updateUser = async function (body, params) {
     throw new Error("User ID is required");
   }
 
-  const { name, role, email, password } = body;
+  const { name, role, email, password, accessPin, previousPassword } = body;
 
   const existingUser = await User.findById(userId);
   if (!existingUser) {
@@ -173,6 +173,14 @@ exports.updateUser = async function (body, params) {
     existingUser.email = email;
   }
   if (password) {
+    if (!previousPassword) {
+      throw new Error("Previous password is required");
+    }
+    const hashedPreviousPassword = hashPassword(previousPassword);
+    if (hashedPreviousPassword !== existingUser.password) {
+      throw new Error("Incorrect previous password");
+    }
+
     existingUser.password = hashPassword(password);
   }
 
