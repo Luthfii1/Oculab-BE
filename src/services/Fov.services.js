@@ -4,7 +4,7 @@ const { Patient } = require("../models/Entity/Patient.models");
 
 exports.postFOVData = async function (params, body) {
   const { examinationId } = params;
-  if (!examinationId) {
+  if (!examinationId || examinationId === ":examinationId") {
     throw new Error("Examination ID is required");
   }
 
@@ -19,7 +19,7 @@ exports.postFOVData = async function (params, body) {
   if (!order) {
     throw new Error("Order is required");
   }
-  if (systemCount === undefined || !systemCount) {
+  if (systemCount === undefined) {
     throw new Error("System count is required");
   }
   if (!confidenceLevel) {
@@ -36,6 +36,11 @@ exports.postFOVData = async function (params, body) {
   });
   if (!patient) {
     throw new Error("Patient not found");
+  }
+
+  const existingFOVData = await FOVData.findById(_id);
+  if (existingFOVData) {
+    throw new Error("Duplicate ID");
   }
 
   const newFOVData = new FOVData({
@@ -55,15 +60,12 @@ exports.postFOVData = async function (params, body) {
   const FOVResponse = newFOVData.toObject();
   delete FOVResponse.__v;
 
-  return {
-    message: "FOVData received successfully",
-    data: FOVResponse,
-  };
+  return FOVResponse;
 };
 
 exports.getAllFOVByExaminationId = async function (params) {
   const { examinationId } = params;
-  if (!examinationId) {
+  if (!examinationId || examinationId === ":examinationId") {
     throw new Error("Examination ID is required");
   }
 
@@ -73,10 +75,7 @@ exports.getAllFOVByExaminationId = async function (params) {
   }
 
   if (examination.FOV.length === 0) {
-    return {
-      message: "FOVData received successfully",
-      data: {},
-    };
+    return {};
   }
 
   const allFovsId = examination.FOV;
@@ -89,9 +88,9 @@ exports.getAllFOVByExaminationId = async function (params) {
     const fovResponse = fov.toObject();
     delete fovResponse.__v;
 
-    if (fovResponse.type === "BTA0") {
+    if (fovResponse.systemCount === 0) {
       fovBta0.push(fovResponse);
-    } else if (fovResponse.type === "BTA1TO9") {
+    } else if (fovResponse.systemCount >= 1 && fovResponse.systemCount <= 9) {
       fovBta1to9.push(fovResponse);
     } else {
       fovBtaAbove9.push(fovResponse);
@@ -104,8 +103,5 @@ exports.getAllFOVByExaminationId = async function (params) {
     BTAABOVE9: fovBtaAbove9,
   };
 
-  return {
-    message: "FOVData received successfully",
-    data: responseData,
-  };
+  return responseData;
 };

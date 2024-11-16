@@ -11,10 +11,10 @@ router.get(
   "/get-examinations-by-user/:patientId",
   examinationControllers.getExaminationsByUser
 );
-router.post(
-  "/update-examination-result/:patientId/:examinationId",
-  examinationControllers.updateExaminationResult
-);
+// router.post(
+//   "/update-examination-result/:patientId/:examinationId",
+//   examinationControllers.updateExaminationResult
+// );
 router.get(
   "/get-examination-by-id/:examinationId",
   examinationControllers.getExaminationById
@@ -24,7 +24,7 @@ router.get(
   examinationControllers.getNumberOfExaminations
 );
 router.post(
-  "/forward-video-to-ml/:patientId/:examinationId",
+  "/forward-video-to-ml/:examinationId",
   uploadVideo.single("video"),
   examinationControllers.forwardVideoToML
 );

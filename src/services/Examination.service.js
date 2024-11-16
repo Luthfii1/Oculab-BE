@@ -16,7 +16,7 @@ dotenv.config();
 
 exports.createExamination = async function (params, body) {
   const patientId = params.patientId;
-  if (!patientId) {
+  if (!patientId || patientId === ":patientId") {
     throw new Error("Patient ID is required");
   }
 
@@ -44,14 +44,11 @@ exports.createExamination = async function (params, body) {
   if (!examinationDate) {
     throw new Error("Examination date is required");
   }
-  if (!statusExamination) {
-    throw new Error("Status of examination is required");
-  }
   if (!PIC) {
-    throw new Error("PIC is required");
+    throw new Error("PIC ID is required");
   }
   if (!DPJP) {
-    throw new Error("DPJP is required");
+    throw new Error("DPJP ID is required");
   }
   if (!examinationPlanDate) {
     throw new Error("Examination plan date is required");
@@ -69,17 +66,19 @@ exports.createExamination = async function (params, body) {
 
   const existingSlideId = await Examination.findOne({ slideId: slideId });
   if (existingSlideId) {
-    throw new Error(`Slide ID ${slideId} already exists`);
+    throw new Error("A patient with the provided slide ID already exists");
   }
 
   const existingLAB = await User.findOne({ _id: PIC });
   if (!existingLAB) {
-    throw new Error("No matching Lab Technician found for the provided ID");
+    throw new Error(
+      "No matching PIC or Lab Technician found for the provided ID"
+    );
   }
 
   const existingDPJP = await User.findOne({ _id: DPJP });
   if (!existingDPJP) {
-    throw new Error("No matching DPJP found for the provided ID");
+    throw new Error("No matching DPJP or Admin found for the provided ID");
   }
 
   let FOV = [];
@@ -116,7 +115,7 @@ exports.createExamination = async function (params, body) {
 
 exports.getExaminationsByUser = async function (params) {
   const { patientId } = params;
-  if (!patientId) {
+  if (!patientId || patientId === ":patientId") {
     throw new Error("Patient ID is required");
   }
 
@@ -127,14 +126,17 @@ exports.getExaminationsByUser = async function (params) {
 
   return {
     message: "Examination data received successfully",
-    data: patient.resultExamination,
+    data: resultExamination,
   };
 };
 
 exports.updateExaminationResult = async function (params, body) {
   const { patientId, examinationId } = params;
-  if (!examinationId || !patientId) {
-    throw new Error("Patient ID or Examination ID are required");
+  if (!patientId || patientId === ":patientId") {
+    throw new Error("Patient ID is required");
+  }
+  if (!examinationId || examinationId === ":examinationId") {
+    throw new Error("Examination ID is required");
   }
 
   const { examination } = body;
@@ -171,13 +173,13 @@ exports.updateExaminationResult = async function (params, body) {
 
   return {
     message: "Successfully to updated the examination data",
-    data: patient.resultExamination,
+    data: resultExamination,
   };
 };
 
 exports.getExaminationById = async function (params) {
   const { examinationId } = params;
-  if (!examinationId) {
+  if (!examinationId || examinationId === ":examinationId") {
     throw new Error("Examination ID is required");
   }
 
@@ -193,11 +195,15 @@ exports.getExaminationById = async function (params) {
   const PIC = await User.findById(examination.PIC);
   const PICResponse = PIC.toObject();
   delete PICResponse.__v;
+  delete PICResponse.password;
+  delete PICResponse.accessPin;
   responseData.PIC = PICResponse;
 
   const DPJP = await User.findById(examination.DPJP);
   const DPJPResponse = DPJP.toObject();
   delete DPJPResponse.__v;
+  delete DPJPResponse.password;
+  delete DPJPResponse.accessPin;
   responseData.DPJP = DPJPResponse;
 
   if (examination.systemResult) {
@@ -236,7 +242,7 @@ exports.getNumberOfExaminations = async function () {
     (result) => result.finalGrading === "NEGATIVE"
   ).length;
 
-  const totalScandy = allExpertExamResults.filter(
+  const totalScanty = allExpertExamResults.filter(
     (result) => result.finalGrading === "SCANTY"
   ).length;
 
@@ -254,7 +260,7 @@ exports.getNumberOfExaminations = async function () {
 
   const numberOfExaminations = {
     negative: totalNegative,
-    scanty: totalScandy,
+    scanty: totalScanty,
     positive1: totalPositive1,
     positive2: totalPositive2,
     positive3: totalPositive3,
@@ -267,12 +273,9 @@ exports.getNumberOfExaminations = async function () {
 };
 
 exports.forwardVideoToML = async function (file, params) {
-  const { patientId, examinationId } = params;
+  const { examinationId } = params;
 
-  if (!patientId) {
-    throw new Error("Patient ID is required");
-  }
-  if (!examinationId) {
+  if (!examinationId || examinationId === ":examinationId") {
     throw new Error("Examination ID is required");
   }
 
@@ -283,17 +286,12 @@ exports.forwardVideoToML = async function (file, params) {
       throw new Error("Video file is required");
     }
 
-    const patient = await Patient.findById(patientId);
-    if (!patient) {
-      throw new Error("We can't find the patient");
-    }
-
     const examination = await Examination.findById(examinationId);
     if (!examination) {
-      throw new Error("We can't find the examination");
+      throw new Error("Examination not found");
     }
 
-    const url = URL_EXTRACT_VIDEO + "/" + patientId + "/" + examinationId;
+    const url = URL_EXTRACT_VIDEO + "/" + examinationId;
     const formData = new FormData();
     formData.append("video", fs.createReadStream(videoFilePath), {
       filename: file.originalname,
@@ -310,7 +308,10 @@ exports.forwardVideoToML = async function (file, params) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Error response body:", errorText);
-      throw new Error(`Failed to forward video to ML service: ${errorText}`);
+      throw new Error({
+        message: "Failed to forward video to ML service",
+        description: `${errorText}.`,
+      });
     }
 
     examination.statusExamination = "INPROGRESS";
@@ -345,7 +346,7 @@ exports.forwardVideoToML = async function (file, params) {
       });
     }
 
-    throw error;
+    throw new Error({ message: "Failed to remove video", description: error });
   }
 };
 
@@ -360,7 +361,9 @@ exports.getAllExaminations = async function () {
       resultExamination: { $in: [examination._id] },
     });
 
-    if (patient) {
+    const pic = await User.findById(examination.PIC);
+
+    if (patient && pic) {
       responseData.push({
         examinationId: examination._id,
         slideId: examination.slideId,
@@ -369,6 +372,8 @@ exports.getAllExaminations = async function () {
         patientName: patient.name,
         patientDoB: patient.DoB,
         examinationPlanDate: examination.examinationPlanDate,
+        picId: pic._id,
+        picName: pic.name,
       });
     }
   }
@@ -408,8 +413,11 @@ exports.getStatisticsTodoLab = async function (params) {
 
 exports.getMonthlyExaminations = async function (params) {
   const { month, year } = params;
-  if (!month || !year || month === ":month" || year === ":year") {
-    throw new Error("Month and year are required");
+  if (!month || month === ":month") {
+    throw new Error("Month is required");
+  }
+  if (!year || year === ":year") {
+    throw new Error("Year is required");
   }
 
   const DECIMAL_BASE = 10;
@@ -421,39 +429,35 @@ exports.getMonthlyExaminations = async function (params) {
   const startDate = new Date(yearNum, monthNum - 1, FIRST_DAY_OF_MONTH);
   const endDate = new Date(yearNum, monthNum, FIRST_DAY_OF_MONTH);
 
-  try {
-    const examinations = await Examination.find({
-      examinationDate: {
-        $gte: startDate,
-        $lt: endDate,
-      },
-    }).sort({ examinationPlanDate: 1 }); // Sort in ascending order
+  const examinations = await Examination.find({
+    examinationDate: {
+      $gte: startDate,
+      $lt: endDate,
+    },
+  }).sort({ examinationDate: 1 }); // Sort in ascending order
 
-    const responseData = [];
+  const responseData = [];
 
-    for (const examination of examinations) {
-      const patient = await Patient.findOne({
-        resultExamination: { $in: [examination._id] },
+  for (const examination of examinations) {
+    const patient = await Patient.findOne({
+      resultExamination: { $in: [examination._id] },
+    });
+
+    if (patient) {
+      responseData.push({
+        examinationId: examination._id,
+        slideId: examination.slideId,
+        statusExamination: examination.statusExamination,
+        patientId: patient._id,
+        patientName: patient.name,
+        patientDoB: patient.DoB,
+        examinationDate: examination.examinationDate,
       });
-
-      if (patient) {
-        responseData.push({
-          examinationId: examination._id,
-          slideId: examination.slideId,
-          statusExamination: examination.statusExamination,
-          patientId: patient._id,
-          patientName: patient.name,
-          patientDoB: patient.DoB,
-          examinationDate: examination.examinationDate,
-        });
-      }
     }
-
-    return {
-      message: "Examination data received successfully",
-      data: responseData,
-    };
-  } catch (error) {
-    throw new Error("Failed to fetch monthly examinations");
   }
+
+  return {
+    message: "Examination data received successfully",
+    data: responseData,
+  };
 };

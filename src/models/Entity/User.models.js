@@ -30,6 +30,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    accessPin: {
+      type: String,
+      required: false,
+    },
   },
   { versionKey: false } // Disables the __v field for versioning
 );

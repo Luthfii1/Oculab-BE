@@ -8,20 +8,17 @@ exports.createNewPatient = async function (body) {
   if (!name) {
     throw new Error("Name is required");
   }
+  if (!NIK) {
+    throw new Error("NIK is required");
+  }
   if (NIK) {
-    if (!NIK) {
-      throw new Error("NIK is required");
-    }
-
     const existingNIK = await Patient.findOne({ NIK: NIK });
     if (existingNIK) {
-      throw new Error(`Patient with NIK ${NIK} already exists`);
+      throw new Error("A patient with the provided NIK already exists");
     }
 
     if (!/^\d{16}$/.test(NIK)) {
-      throw new Error(
-        "NIK must be a 16-digit number with no spaces or special characters"
-      );
+      throw new Error("A valid NIK format is required");
     }
   }
   if (!DoB) {
@@ -33,18 +30,18 @@ exports.createNewPatient = async function (body) {
   if (BPJS) {
     const existingBPJS = await Patient.findOne({ BPJS: BPJS });
     if (existingBPJS) {
-      throw new Error(`Patient with BPJS ${BPJS} already exists`);
+      throw new Error("A patient with the provided BPJS already exists");
     }
 
     if (!/^\d{13}$/.test(BPJS)) {
-      throw new Error("BPJS must be a 13-digit numeric string");
+      throw new Error("A valid BPJS format is required");
     }
   }
 
   // Check if patient._id already exists
   const existingId = await Patient.findById(_id);
   if (existingId) {
-    throw new Error(`Patient with ID ${_id} already exists`);
+    throw new Error("A patient with the provided ID already exists");
   }
 
   let resultExamination = [];
@@ -105,7 +102,7 @@ exports.updatePatient = async function (body, params) {
     changesDetected = true;
   } else if (BPJS) {
     if (!/^\d{13}$/.test(BPJS)) {
-      throw new Error("BPJS must be a 13-digit numeric string");
+      throw new Error("A valid BPJS format is required");
     }
     if (BPJS !== existingPatient.BPJS) {
       existingPatient.BPJS = BPJS;
@@ -114,7 +111,10 @@ exports.updatePatient = async function (body, params) {
   }
 
   if (!changesDetected) {
-    return { message: "No changes detected in patient data" };
+    return {
+      message: "No changes detected in patient data",
+      data: existingPatient,
+    };
   }
 
   await existingPatient.save();
@@ -143,7 +143,7 @@ exports.getAllPatients = async function () {
 
 exports.getPatientById = async function (params) {
   const { patientId } = params;
-  if (!patientId) {
+  if (!patientId || patientId === ":patientId") {
     throw new Error("Patient ID is required");
   }
 
@@ -163,7 +163,7 @@ exports.getPatientById = async function (params) {
 
 exports.getAllPatientsByName = async function (params) {
   const { patientName } = params;
-  if (!patientName) {
+  if (!patientName || patientName === ":patientName") {
     throw new Error("Patient name is required");
   }
 
@@ -176,7 +176,6 @@ exports.getAllPatientsByName = async function (params) {
   const patientsResponse = patients.map((patient) => {
     const patientObj = patient.toObject();
     delete patientObj.__v;
-
     return patientObj;
   });
 
