@@ -329,6 +329,7 @@ exports.updateUser = async function (req, res) {
   } catch (error) {
     switch (error.message) {
       case "User ID is required":
+      case "Previous password is required":
         sendResponse(
           res,
           ResponseType.ERROR,
@@ -336,7 +337,7 @@ exports.updateUser = async function (req, res) {
           error.message,
           null,
           ErrorResponseType.VALIDATION_ERROR,
-          "User ID is required"
+          error.message
         );
         break;
       case "User not found":
@@ -348,6 +349,17 @@ exports.updateUser = async function (req, res) {
           null,
           ErrorResponseType.RESOURCE_NOT_FOUND,
           "User not found"
+        );
+        break;
+      case "Incorrect previous password":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          401,
+          error.message,
+          null,
+          ErrorResponseType.PERMISSION_ERROR,
+          "Incorrect previous password"
         );
         break;
       default:
