@@ -188,7 +188,6 @@ exports.updateUser = async function (body, params) {
   await existingUser.save();
   const userResponse = existingUser.toObject();
   delete userResponse.password;
-  delete userResponse.accessPin;
   delete userResponse.__v;
 
   return userResponse;
