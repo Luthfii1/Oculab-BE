@@ -329,7 +329,9 @@ exports.forwardVideoToML = async function (file, params) {
 
     return {
       message: "Video forwarded to ML service successfully",
-      data: result,
+      data: {
+        statusML: result,
+      },
     };
   } catch (error) {
     console.error("Error occurred:", error);
