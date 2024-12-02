@@ -8,7 +8,8 @@ exports.postExpertResult = async function (body, params) {
     throw new Error("Examination ID is required");
   }
 
-  const { _id, finalGrading, bacteriaTotalCount, notes } = body;
+  const { _id, finalGrading, bacteriaTotalCount } = body;
+  let { notes } = body;
   if (!finalGrading) {
     throw new Error("Final grading is required");
   }
@@ -16,7 +17,7 @@ exports.postExpertResult = async function (body, params) {
     throw new Error("Bacteria total count is required");
   }
   if (!notes) {
-    throw new Error("Notes is required");
+    notes = " ";
   }
 
   const existingExamination = await Examination.findById(examinationId);
