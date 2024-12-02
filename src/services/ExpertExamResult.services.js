@@ -13,12 +13,6 @@ exports.postExpertResult = async function (body, params) {
   if (!finalGrading) {
     throw new Error("Final grading is required");
   }
-  if ((!bacteriaTotalCount, bacteriaTotalCount === undefined)) {
-    throw new Error("Bacteria total count is required");
-  }
-  if (!notes) {
-    notes = " ";
-  }
 
   const existingExamination = await Examination.findById(examinationId);
   if (!existingExamination) {

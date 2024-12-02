@@ -20,7 +20,7 @@ const ExpertExamResultSchema = new mongoose.Schema(
     },
     notes: {
       type: String,
-      required: true,
+      required: false,
     },
   },
   { versionKey: false } // Disables the __v field for versioning
