@@ -39,6 +39,11 @@ exports.postExpertResult = async function (body, params) {
   });
   await newExpertResultData.save();
 
+  // update examinationDate to current date
+  existingExamination.examinationDate = new Date();
+  await existingExamination.save();
+
+  // update patient status to "FINISHED"
   existingExamination.expertResult = newExpertResultData._id;
   existingExamination.statusExamination = "FINISHED";
   await existingExamination.save();

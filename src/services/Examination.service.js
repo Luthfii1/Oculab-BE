@@ -373,6 +373,7 @@ exports.getAllExaminations = async function () {
         patientId: patient._id,
         patientName: patient.name,
         patientDoB: patient.DoB,
+        examinationDate: examination.examinationDate,
         examinationPlanDate: examination.examinationPlanDate,
         picId: pic._id,
         picName: pic.name,
