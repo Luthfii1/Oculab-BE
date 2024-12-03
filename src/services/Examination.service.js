@@ -352,9 +352,13 @@ exports.forwardVideoToML = async function (file, params) {
   }
 };
 
-exports.getAllExaminations = async function () {
-  const examinations = await Examination.find();
+exports.getAllExaminations = async function (params) {
+  const { userId } = params;
+  if (!userId || userId === ":userId") {
+    throw new Error("User ID is required");
+  }
 
+  const examinations = await Examination.find({ PIC: userId });
   var responseData = [];
 
   // find patient by examinationId

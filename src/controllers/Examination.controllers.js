@@ -294,18 +294,32 @@ exports.forwardVideoToML = async function (req, res) {
 
 exports.getAllExaminations = async function (req, res) {
   try {
-    const result = await ExaminationService.getAllExaminations();
+    const result = await ExaminationService.getAllExaminations(req.params);
     sendResponse(res, ResponseType.SUCCESS, 200, result.message, result.data);
   } catch (error) {
-    sendResponse(
-      res,
-      "error",
-      500,
-      "Internal server error",
-      null,
-      ErrorResponseType.INTERNAL_SERVER,
-      error.message || "An unexpected error occurred."
-    );
+    switch (error.message) {
+      case "User ID is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The request is missing the required user ID."
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          "error",
+          500,
+          "Internal server error",
+          null,
+          ErrorResponseType.INTERNAL_SERVER,
+          error.message || "An unexpected error occurred."
+        );
+    }
   }
 };
 
