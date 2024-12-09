@@ -22,7 +22,7 @@ exports.postFOVData = async function (params, body) {
   if (systemCount === undefined) {
     throw new Error("System count is required");
   }
-  if (!confidenceLevel) {
+  if (confidenceLevel === undefined) {
     throw new Error("Confidence level is required");
   }
 
