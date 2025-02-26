@@ -40,8 +40,7 @@ app.use("/systemResult", systemResultRoutes);
 app.use("/expertResult", expertResultRoutes);
 
 const port = process.env.PORT || 3000;
-const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 
-app.listen(port, host, () => {
-  console.log(`Server is running on ${host}:${port}`);
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
