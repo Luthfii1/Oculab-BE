@@ -22,6 +22,7 @@ const userRoutes = require("./src/routes/User.routes");
 const systemResultRoutes = require("./src/routes/SystemExamResult.routes");
 const expertResultRoutes = require("./src/routes/ExpertExamResult.routes");
 const aiAnalysisProgressRoutes = require("./src/routes/AIAnalysisProgressTracking.routes");
+const contactRoutes = require("./src/routes/Contact.routes");
 
 const constants = require("./src/config/constants");
 
@@ -49,6 +50,7 @@ app.use("/user", userRoutes);
 app.use("/systemResult", systemResultRoutes);
 app.use("/expertResult", expertResultRoutes);
 app.use("/aiAnalysisProgress", aiAnalysisProgressRoutes);
+app.use("/contact", contactRoutes);
 
 const port = process.env.PORT || 3000;
 
