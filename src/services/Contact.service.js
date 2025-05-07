@@ -16,6 +16,6 @@ exports.getWhatsappLinkByContactId = async function (params) {
 
   return {
     id: contact._id,
-    whatsapp_link: whatsappLink,
+    whatsappLink: whatsappLink,
   };
 };
