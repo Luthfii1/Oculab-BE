@@ -105,3 +105,20 @@ exports.getAllFOVByExaminationId = async function (params) {
 
   return responseData;
 };
+
+exports.updateVerifiedField = async function (params, body) {
+  const { fovId } = params;
+  if (!fovId || fovId === ":fovId") {
+    throw new Error("FOV ID is required");
+  }
+
+  const fov = await FOVData.findById(fovId);
+  if (!fov) {
+    throw new Error("FOV not found");
+  }
+
+  fov.verified = true;
+  await fov.save();
+
+  return fov;
+};
