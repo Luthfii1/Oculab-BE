@@ -118,3 +118,55 @@ exports.getAllFOVByExaminationId = async function (req, res) {
     }
   }
 };
+
+exports.updateVerifiedField = async function (req, res) {
+  try {
+    const result = await fovService.updateVerifiedField(req.params, req.body);
+
+    sendResponse(
+      res,
+      ResponseType.SUCCESS,
+      200,
+      "Verified field updated successfully",
+      result
+    );
+  } catch (error) {
+    switch (error.message) { 
+      case "FOV ID is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The request is missing the required FOV ID."
+        );
+        break;
+      case "FOV not found":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.RESOURCE_NOT_FOUND,
+          "The FOV data ID provided does not exist."
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          error.message,
+          null,
+          ErrorResponseType.INTERNAL_ERROR,
+          "An error occurred while processing the request."
+        );
+        break;
+    }
+  }
+};
+
+
