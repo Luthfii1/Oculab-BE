@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - PORT=${PORT}
+      - MODEL_URL=${MODEL_URL}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - ACCESS_TOKEN=${ACCESS_TOKEN}
+      - REFRESH_TOKEN=${REFRESH_TOKEN}
+      - GLOBAL_SALT=${GLOBAL_SALT}
+      - IMAGE_PREVIEW=${IMAGE_PREVIEW}
+      - NODE_ENV=${NODE_ENV}

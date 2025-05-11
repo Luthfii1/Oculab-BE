@@ -103,12 +103,12 @@ exports.refreshToken = async function (body, params) {
 };
 
 exports.getAllUsers = async function () {
-  const existingUser = await User.find();
-  if (!existingUser) {
-    throw new Error("User not found");
+  const users = await User.find().select("name role email username");
+  if (!users || users.length === 0) {
+    throw new Error("No users found");
   }
 
-  return existingUser;
+  return users;
 };
 
 exports.getUserById = async function (params) {

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebSocket Test</title>
+</head>
+<body>
+  <h2>🧪 WebSocket Progress Tracker</h2>
+  <div id="log"></div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const socket = io("http://localhost:3000");
+
+    socket.on("connect", () => {
+      log("✅ Connected to socket: " + socket.id);
+      socket.emit("join", "exam_001");
+    });
+
+    socket.on("disconnect", (reason) => {
+    log("⚠️ Disconnected: " + reason);
+  });
+
+    socket.on("analysis:update", (data) => {
+      log("📦 Update: " + JSON.stringify(data));
+    });
+
+    function log(msg) {
+      document.getElementById("log").innerHTML += `<p>${msg}</p>`;
+    }
+  </script>
+</body>
+</html>
