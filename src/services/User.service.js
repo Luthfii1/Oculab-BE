@@ -3,7 +3,11 @@ const {
   generateAccessToken,
   generateRefreshToken,
 } = require("../utils/TokenUtilities");
-const { hashPassword } = require("../utils/PasswordUtilities");
+const {
+  hashPassword,
+  generateRandomPassword,
+} = require("../utils/PasswordUtilities");
+const { generateUniqueUsername } = require("../utils/UsernameUtilities");
 
 exports.login = async function (body) {
   const { email, password } = body;
@@ -34,7 +38,7 @@ exports.login = async function (body) {
 };
 
 exports.register = async function (body) {
-  const { _id, name, role, email, password, accessPin } = body;
+  const { _id, name, role, email, accessPin } = body;
   if (!name) {
     throw new Error("Name is required");
   }
@@ -44,16 +48,15 @@ exports.register = async function (body) {
   if (!email) {
     throw new Error("Email is required");
   }
-  if (!password) {
-    throw new Error("Password is required");
-  }
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     throw new Error("User already exists");
   }
 
-  const hashedPassword = hashPassword(password);
+  const username = await generateUniqueUsername(name);
+  const randomPassword = generateRandomPassword();
+  const hashedPassword = hashPassword(randomPassword);
 
   const isIdDuplicate = await User.findById(_id);
   if (isIdDuplicate) {
@@ -65,15 +68,23 @@ exports.register = async function (body) {
     name: name,
     role: role,
     email: email,
+    username: username,
     password: hashedPassword,
     accessPin: accessPin,
   });
   await newUser.save();
 
-  const response = newUser.toObject();
-  delete response.__v;
+  return {
+    userId: newUser._id,
+    username: newUser.username,
+    currentPassword: randomPassword,
+  };
 
-  return response;
+  // full response:
+  // const response = newUser.toObject();
+  // response.currentGeneratedPassword = randomPassword;
+  // delete response.__v;
+  // return response;
 };
 
 exports.refreshToken = async function (body, params) {
@@ -146,6 +157,34 @@ exports.getAllPics = async function () {
   });
 
   return pics;
+};
+
+exports.updateUserPassword = async function (body, params) {
+  const { userId } = params;
+  if (!userId || userId === ":userId") {
+    throw new Error("User ID is required");
+  }
+
+  const existingUser = await User.findById(userId);
+
+  const { newPassword } = body;
+  if (!newPassword) {
+    throw new Error("New password is required");
+  }
+
+  const hashedPassword = hashPassword(newPassword);
+  if (existingUser.password == hashedPassword) {
+    throw new Error("Password must be different from the previous one");
+  }
+
+  existingUser.password = hashedPassword;
+  await existingUser.save();
+
+  return {
+    userId: existingUser._id,
+    username: existingUser.username,
+    currentPassword: newPassword,
+  };
 };
 
 exports.updateUser = async function (body, params) {
