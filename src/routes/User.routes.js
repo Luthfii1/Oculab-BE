@@ -17,6 +17,7 @@ router.post(
 );
 router.get(
   "/get-all-user-data",
+  authenticateToken,
   authorizeRole([roleType.RolesType.ADMIN]),
   userControllers.getAllUsers
 );
