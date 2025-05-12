@@ -114,7 +114,10 @@ exports.refreshToken = async function (body, params) {
 };
 
 exports.getAllUsers = async function () {
-  const users = await User.find().select("name role email username");
+  const users = await User.find()
+    .select("name role email username")
+    .sort({ name: 1 }); //ascending order
+
   if (!users || users.length === 0) {
     throw new Error("No users found");
   }
