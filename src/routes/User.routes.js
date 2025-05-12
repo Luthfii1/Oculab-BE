@@ -17,7 +17,6 @@ router.post(
 );
 router.get(
   "/get-all-user-data",
-  authenticateToken,
   authorizeRole([roleType.RolesType.ADMIN]),
   userControllers.getAllUsers
 );
@@ -27,7 +26,6 @@ router.put("/update-user/:userId", userControllers.updateUser);
 router.put("/update-user-password/:userId", userControllers.updateUserPassword);
 router.delete(
   "/delete-user/:userId",
-  authenticateToken,
   authorizeRole([roleType.RolesType.ADMIN]),
   userControllers.deleteUser
 );
