@@ -165,19 +165,24 @@ exports.updateUserPassword = async function (body, params) {
     throw new Error("User ID is required");
   }
 
-  const existingUser = await User.findById(userId);
-
-  const { newPassword } = body;
-  if (!newPassword) {
-    throw new Error("New password is required");
+  const { newPassword, previousPassword } = body;
+  if (!newPassword || !previousPassword) {
+    throw new Error("New and previous password is required");
   }
 
-  const hashedPassword = hashPassword(newPassword);
-  if (existingUser.password == hashedPassword) {
+  const existingUser = await User.findById(userId);
+
+  const hashedPreviousPassword = hashPassword(previousPassword);
+  if (hashedPreviousPassword !== existingUser.password) {
+    throw new Error("Invalid previous password"); //check if user's new pass input matched the actual pass
+  }
+
+  const hashedNewPassword = hashPassword(newPassword);
+  if (hashedPreviousPassword == hashedNewPassword) {
     throw new Error("Password must be different from the previous one");
   }
 
-  existingUser.password = hashedPassword;
+  existingUser.password = hashedNewPassword;
   await existingUser.save();
 
   return {
@@ -226,6 +231,26 @@ exports.updateUser = async function (body, params) {
 
   await existingUser.save();
   const userResponse = existingUser.toObject();
+  delete userResponse.password;
+  delete userResponse.__v;
+
+  return userResponse;
+};
+
+exports.deleteUser = async function (params) {
+  const { userId } = params;
+
+  if (!userId || userId === ":userId") {
+    throw new Error("User ID is required");
+  }
+
+  const deletedUser = await User.findByIdAndDelete(userId);
+
+  if (!deletedUser) {
+    throw new Error("User not found or already deleted");
+  }
+
+  const userResponse = deletedUser.toObject();
   delete userResponse.password;
   delete userResponse.__v;
 
