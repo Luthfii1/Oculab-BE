@@ -391,7 +391,59 @@ exports.updateUserPassword = async function (req, res) {
   } catch (error) {
     switch (error.message) {
       case "User ID is required":
+      case "New and previous password is required":
+      case "Invalid previous password":
       case "Password must be different from the previous one":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          error.message
+        );
+        break;
+      case "User not found":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.RESOURCE_NOT_FOUND,
+          "User not found"
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          error.message,
+          null,
+          ErrorResponseType.INTERNAL_VALIDATION_ERROR,
+          error.message
+        );
+        break;
+    }
+  }
+};
+
+exports.deleteUser = async function (req, res) {
+  try {
+    const result = await userServices.deleteUser(req.params);
+
+    sendResponse(
+      res,
+      ResponseType.SUCCESS,
+      200,
+      "User has been deleted successfully",
+      result
+    );
+  } catch (error) {
+    switch (error.message) {
+      case "User ID is required":
         sendResponse(
           res,
           ResponseType.ERROR,
