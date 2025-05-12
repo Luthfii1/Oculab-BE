@@ -35,8 +35,13 @@ function authenticateToken(req, res, next) {
       );
     }
 
-    req.body.tokenUserId = decoded.userId;
-    req.body.tokenRole = decoded.role;
+    req.user = {
+      userId: decoded.userId,
+      role: decoded.role,
+    };
+
+    // req.body.tokenUserId = decoded.userId;
+    // req.body.tokenRole = decoded.role;
     next();
   });
 }
@@ -70,8 +75,12 @@ function authenticateRefreshToken(req, res, next) {
       );
     }
 
-    req.body.tokenUserId = decoded.userId;
-    req.body.tokenRole = decoded.role;
+    req.user = {
+      userId: decoded.userId,
+      role: decoded.role,
+    };
+    // req.body.tokenUserId = decoded.userId;
+    // req.body.tokenRole = decoded.role;
     next();
   });
 }
