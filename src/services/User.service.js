@@ -8,6 +8,7 @@ const {
   generateRandomPassword,
 } = require("../utils/PasswordUtilities");
 const { generateUniqueUsername } = require("../utils/UsernameUtilities");
+const emailService = require("./Email.service");
 
 exports.login = async function (body) {
   const { email, password } = body;
@@ -72,19 +73,21 @@ exports.register = async function (body) {
     password: hashedPassword,
     accessPin: accessPin,
   });
-  await newUser.save();
 
-  return {
-    userId: newUser._id,
-    username: newUser.username,
-    currentPassword: randomPassword,
-  };
+  try {
+    await Promise.all([
+      newUser.save(),
+      emailService.sendWelcomeEmail(email, username, randomPassword)
+    ]);
 
-  // full response:
-  // const response = newUser.toObject();
-  // response.currentGeneratedPassword = randomPassword;
-  // delete response.__v;
-  // return response;
+    return {
+      userId: newUser._id,
+      username: newUser.username,
+      currentPassword: randomPassword,
+    };
+  } catch (error) {
+    throw new Error("REGISTRATION_FAILED");
+  }
 };
 
 exports.refreshToken = async function (body, params) {
