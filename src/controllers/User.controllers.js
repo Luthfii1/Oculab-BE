@@ -111,6 +111,17 @@ exports.register = async function (req, res) {
           "The user ID provided already exists."
         );
         break;
+      case "REGISTRATION_FAILED":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          error.message,
+          null,
+          ErrorResponseType.INTERNAL_VALIDATION_ERROR,
+          error.message
+        );
+        break;
       default:
         sendResponse(
           res,
