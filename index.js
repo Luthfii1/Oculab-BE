@@ -42,6 +42,19 @@ app.use(
     credentials: true,
   })
 );
+
+// Swagger setup
+const swaggerOptions = {
+  explorer: true,
+  swaggerOptions: {
+    docExpansion: "list",
+    filter: true,
+  },
+};
+app.use("/api-docs", swaggerUI.serve);
+app.get("/api-docs", swaggerUI.setup(swaggerSpec, swaggerOptions));
+app.get("/swagger", (req, res) => res.redirect("/api-docs"));
+
 // Routes used in the application
 app.get("/", getHomePage);
 app.use("/patient", patientRoutes);
@@ -53,10 +66,9 @@ app.use("/expertResult", expertResultRoutes);
 app.use("/aiAnalysisProgress", aiAnalysisProgressRoutes);
 app.use("/contact", contactRoutes);
 
-app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
-
 const port = process.env.PORT || 3000;
 
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+  console.log(`Swagger documentation available at /api-docs`);
 });
