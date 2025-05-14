@@ -7,6 +7,8 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const db = require("./src/config/db");
 const modelBackend = require("./src/config/modelBackend");
+const swaggerUI = require("swagger-ui-express");
+const swaggerSpec = require("./src/config/swagger");
 
 const app = express();
 const server = http.createServer(app);
@@ -40,7 +42,6 @@ app.use(
     credentials: true,
   })
 );
-
 // Routes used in the application
 app.get("/", getHomePage);
 app.use("/patient", patientRoutes);
@@ -51,6 +52,8 @@ app.use("/systemResult", systemResultRoutes);
 app.use("/expertResult", expertResultRoutes);
 app.use("/aiAnalysisProgress", aiAnalysisProgressRoutes);
 app.use("/contact", contactRoutes);
+
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
 const port = process.env.PORT || 3000;
 
