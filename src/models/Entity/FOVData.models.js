@@ -39,6 +39,7 @@ const FOVDataSchema = new mongoose.Schema(
     verified: {
       type: Boolean,
       required: true,
+      default: false,
     },
   },
   { versionKey: false } // Disables the __v field for versioning
