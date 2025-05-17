@@ -1,19 +1,19 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const accessToken = process.env.ACCESS_TOKEN;
 const refreshToken = process.env.REFRESH_TOKEN;
 
 function generateAccessToken(user) {
-    const payload = { userId: user._id, role: user.role };
-    return jwt.sign(payload, accessToken, { expiresIn: "15m" });
+  const payload = { userId: user._id, role: user.role };
+  return jwt.sign(payload, accessToken, { expiresIn: "12h" });
 }
 
 function generateRefreshToken(user) {
-    const payload = { userId: user._id, role: user.role };
-    return jwt.sign(payload, refreshToken);
+  const payload = { userId: user._id, role: user.role };
+  return jwt.sign(payload, refreshToken);
 }
 
 module.exports = {
-    generateAccessToken,
-    generateRefreshToken
+  generateAccessToken,
+  generateRefreshToken,
 };
