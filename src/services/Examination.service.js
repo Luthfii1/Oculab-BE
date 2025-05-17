@@ -468,3 +468,171 @@ exports.getMonthlyExaminations = async function (params) {
     data: responseData,
   };
 };
+
+exports.getUnfinishedExaminationCardData = async function (params) {
+  const { userId } = params;
+
+  if (!userId || userId === ":userId") {
+    throw new Error("User ID is required");
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const unfinishedExaminations = await Examination.find({
+    PIC: userId,
+    statusExamination: {
+      $in: ["NOTSTARTED", "INPROGRESS", "NEEDVALIDATION"],
+    },
+  });
+
+  if (!unfinishedExaminations || unfinishedExaminations.length === 0) {
+    throw new Error("No examinations found for this user");
+  }
+
+  const examinationIds = unfinishedExaminations.map((exam) => exam._id);
+
+  const patients = await Patient.find({
+    resultExamination: { $in: examinationIds },
+  });
+
+  const patientByExamId = {};
+  patients.forEach((patient) => {
+    patient.resultExamination.forEach((examId) => {
+      if (examinationIds.includes(examId)) {
+        patientByExamId[examId] = {
+          name: patient.name,
+          dob: patient.DoB,
+        };
+      }
+    });
+  });
+
+  const cardData = unfinishedExaminations.map((exam) => {
+    const patientInfo = patientByExamId[exam._id] || {
+      name: "Unknown",
+      dob: null,
+    };
+
+    return {
+      id: exam._id,
+      slideId: exam.slideId,
+      examinationPlanDate: exam.examinationPlanDate,
+      statusExamination: exam.statusExamination,
+      patientName: patientInfo.name,
+      patientDob: patientInfo.dob,
+    };
+  });
+
+  return { data: cardData };
+};
+
+exports.getFinishedExaminationCardData = async function (params) {
+  const { userId, date } = params;
+
+  if (!userId || userId === ":userId") {
+    throw new Error("User ID is required");
+  }
+
+  if (!date || date === ":date") {
+    throw new Error("Date is required");
+  }
+
+  const requestDate = new Date(date);
+
+  if (isNaN(requestDate.getTime())) {
+    throw new Error("Invalid date format. Please use YYYY-MM-DD format.");
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (requestDate > today) {
+    throw new Error("Cannot retrieve future examination data");
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const startDate = new Date(date);
+  startDate.setHours(0, 0, 0, 0);
+
+  const endDate = new Date(date);
+  endDate.setHours(23, 59, 59, 999);
+
+  const finishedExaminations = await Examination.find({
+    PIC: userId,
+    statusExamination: "FINISHED",
+    examinationDate: { $gte: startDate, $lte: endDate },
+  });
+
+  if (!finishedExaminations || finishedExaminations.length === 0) {
+    throw new Error("No finished examinations found for this date");
+  }
+
+  const examinationIds = finishedExaminations.map((exam) => exam._id);
+
+  const dpjpIds = finishedExaminations.map((exam) => exam.DPJP).filter(Boolean);
+  const dpjps = await User.find({ _id: { $in: dpjpIds } });
+
+  const dpjpMap = {};
+  dpjps.forEach((dpjp) => {
+    dpjpMap[dpjp._id] = dpjp.fullName || dpjp.name || "Unknown";
+  });
+
+  const expertResultIds = finishedExaminations
+    .map((exam) => exam.expertResult)
+    .filter(Boolean);
+
+  const expertResults = await ExpertExamResult.find({
+    _id: { $in: expertResultIds },
+  });
+
+  const expertResultMap = {};
+  expertResults.forEach((result) => {
+    expertResultMap[result._id] = result.finalGrading;
+  });
+
+  const patients = await Patient.find({
+    resultExamination: { $in: examinationIds },
+  });
+
+  const patientByExamId = {};
+  patients.forEach((patient) => {
+    patient.resultExamination.forEach((examId) => {
+      if (examinationIds.includes(examId)) {
+        patientByExamId[examId] = {
+          name: patient.name,
+          dob: patient.DoB,
+        };
+      }
+    });
+  });
+
+  const cardData = finishedExaminations.map((exam) => {
+    const patientInfo = patientByExamId[exam._id] || {
+      name: "Unknown",
+      dob: null,
+    };
+
+    return {
+      id: exam._id,
+      slideId: exam.slideId,
+      examinationDate: exam.examinationDate,
+      statusExamination: exam.statusExamination,
+      patientName: patientInfo.name,
+      patientDob: patientInfo.dob,
+      dpjpName: dpjpMap[exam.DPJP] || "Unknown",
+      finalGradingResult:
+        exam.expertResult && expertResultMap[exam.expertResult]
+          ? expertResultMap[exam.expertResult]
+          : "N/A",
+    };
+  });
+
+  return { data: cardData };
+};
