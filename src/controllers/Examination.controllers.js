@@ -373,3 +373,148 @@ exports.getMonthlyExaminations = async function (req, res) {
     }
   }
 };
+
+exports.getUnfinishedExaminationCardData = async function (req, res) {
+  try {
+    const result = await ExaminationService.getUnfinishedExaminationCardData(
+      req.params
+    );
+    sendResponse(res, ResponseType.SUCCESS, 200, result.message, result.data);
+  } catch (error) {
+    switch (error.message) {
+      case "User ID is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The request is missing the required user ID."
+        );
+        break;
+      case "User not found":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "No user found with the provided ID."
+        );
+        break;
+      case "No examinations found for this user":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "No unfinished examinations found for this user."
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          "Internal server error",
+          null,
+          ErrorResponseType.INTERNAL_SERVER,
+          error.message || "An unexpected error occurred."
+        );
+        break;
+    }
+  }
+};
+
+exports.getFinishedExaminationCardData = async function (req, res) {
+  try {
+    const result = await ExaminationService.getFinishedExaminationCardData(
+      req.params
+    );
+    sendResponse(res, ResponseType.SUCCESS, 200, result.message, result.data);
+  } catch (error) {
+    switch (error.message) {
+      case "User ID is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The request is missing the required user ID."
+        );
+        break;
+      case "Date is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The request is missing the required date."
+        );
+        break;
+      case "Invalid date format. Please use YYYY-MM-DD format.":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The provided date is in an invalid format. Please use YYYY-MM-DD."
+        );
+        break;
+      case "Cannot retrieve future examination data":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "Future dates are not allowed."
+        );
+        break;
+      case "User not found":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "No user found with the provided ID."
+        );
+        break;
+      case "No finished examinations found for this date":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "No finished examinations found for this date."
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          "Internal server error",
+          null,
+          ErrorResponseType.INTERNAL_SERVER,
+          error.message || "An unexpected error occurred."
+        );
+        break;
+    }
+  }
+};
