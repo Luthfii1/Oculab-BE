@@ -28,7 +28,10 @@ router.post(
   uploadVideo.single("video"),
   examinationControllers.forwardVideoToML
 );
-router.get("/get-all-examinations/:userId", examinationControllers.getAllExaminations);
+router.get(
+  "/get-all-examinations/:userId",
+  examinationControllers.getAllExaminations
+);
 router.get(
   "/get-statistics-todo-lab/:userId",
   examinationControllers.getStatisticsTodoLab
@@ -36,6 +39,14 @@ router.get(
 router.get(
   "/get-monthly-examinations/:month/:year",
   examinationControllers.getMonthlyExaminations
+);
+router.get(
+  "/get-unfinished-examination-card-data/:userId",
+  examinationControllers.getUnfinishedExaminationCardData
+);
+router.get(
+  "/get-finished-examination-card-data/:userId/:date",
+  examinationControllers.getFinishedExaminationCardData
 );
 
 module.exports = router;
