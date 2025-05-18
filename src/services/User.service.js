@@ -77,7 +77,7 @@ exports.register = async function (body) {
   try {
     await Promise.all([
       newUser.save(),
-      emailService.sendWelcomeEmail(email, username, randomPassword)
+      emailService.sendWelcomeEmail(email, username, randomPassword),
     ]);
 
     return {
@@ -194,7 +194,7 @@ exports.updateUserPassword = async function (body, params) {
   return {
     userId: existingUser._id,
     username: existingUser.username,
-    currentPassword: newPassword,
+    newPassword: newPassword,
   };
 };
 
@@ -257,8 +257,12 @@ exports.deleteUser = async function (params) {
   }
 
   const userResponse = deletedUser.toObject();
-  delete userResponse.password;
-  delete userResponse.__v;
 
-  return userResponse;
+  return {
+    userId: userResponse._id,
+    name: userResponse.name,
+    role: userResponse.role,
+    email: userResponse.email,
+    username: userResponse?.username,
+  };
 };
