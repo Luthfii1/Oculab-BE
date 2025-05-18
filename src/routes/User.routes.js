@@ -24,9 +24,14 @@ router.get(
 router.get("/get-user-data-by-id/:userId", userControllers.getUserById);
 router.get("/get-all-pics", userControllers.getAllPics);
 router.put("/update-user/:userId", userControllers.updateUser);
-router.put("/update-user-password/:userId", userControllers.updateUserPassword);
+router.put(
+  "/update-user-password/:userId",
+  authenticateToken,
+  userControllers.updateUserPassword
+);
 router.delete(
   "/delete-user/:userId",
+  authenticateToken,
   authorizeRole([roleType.RolesType.ADMIN]),
   userControllers.deleteUser
 );
