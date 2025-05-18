@@ -40,8 +40,6 @@ function authenticateToken(req, res, next) {
       role: decoded.role,
     };
 
-    // req.body.tokenUserId = decoded.userId;
-    // req.body.tokenRole = decoded.role;
     next();
   });
 }
@@ -79,8 +77,7 @@ function authenticateRefreshToken(req, res, next) {
       userId: decoded.userId,
       role: decoded.role,
     };
-    // req.body.tokenUserId = decoded.userId;
-    // req.body.tokenRole = decoded.role;
+
     next();
   });
 }
