@@ -13,6 +13,14 @@ const FOVDataSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    imageOriginal: {
+      type: String,
+      required: false,
+    },
+    imageMLAnalyzed: {
+      type: String,
+      required: false,
+    },
     type: {
       type: String,
       enum: FOVType,
@@ -40,6 +48,10 @@ const FOVDataSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
       default: false,
+    },
+    boundingBoxData: {
+      type: [String],
+      required: false,
     },
   },
   { versionKey: false } // Disables the __v field for versioning

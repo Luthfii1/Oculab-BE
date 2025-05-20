@@ -15,7 +15,7 @@ exports.login = async function (req, res) {
     );
   } catch (error) {
     switch (error.message) {
-      case "Email and password are required":
+      case "Username and password are required":
         sendResponse(
           res,
           ResponseType.ERROR,
@@ -23,7 +23,7 @@ exports.login = async function (req, res) {
           error.message,
           null,
           ErrorResponseType.INTERNAL_VALIDATION_ERROR,
-          "Email and password are required"
+          "Username and password are required"
         );
         break;
       case "User doesn't exist":

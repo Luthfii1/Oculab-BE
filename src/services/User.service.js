@@ -11,12 +11,12 @@ const { generateUniqueUsername } = require("../utils/UsernameUtilities");
 const emailService = require("./Email.service");
 
 exports.login = async function (body) {
-  const { email, password } = body;
-  if (!email || !password) {
-    throw new Error("Email and password are required");
+  const { username, password } = body;
+  if (!username || !password) {
+    throw new Error("Username and password are required");
   }
 
-  const existingUser = await User.findOne({ email: email });
+  const existingUser = await User.findOne({ username: username });
   if (!existingUser) {
     throw new Error("User doesn't exist");
   }
