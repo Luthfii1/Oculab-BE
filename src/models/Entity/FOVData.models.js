@@ -69,7 +69,7 @@ const FOVDataSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
-    boundingBoxes: {
+    boundingBoxData: {
       type: BoundingBoxDataSchema,
       required: false,
     },

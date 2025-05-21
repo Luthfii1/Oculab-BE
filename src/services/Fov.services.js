@@ -81,8 +81,8 @@ exports.postFOVDataNew = async function (params, body) {
     systemCount,
     confidenceLevel,
     boxes,
-    frameHeight = 600,
-    frameWidth = 600,
+    frameHeight,
+    frameWidth,
   } = body;
 
   if (!image) throw new Error("Image is required");
@@ -115,7 +115,6 @@ exports.postFOVDataNew = async function (params, body) {
         yCoordinate: box.y,
         width: box.width,
         height: box.height,
-        status: "UNVERIFIED",
       }));
 
       const createdBoxes = await Promise.all(
