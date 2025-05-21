@@ -41,19 +41,12 @@ exports.createExamination = async function (params, body) {
   if (!slideId) {
     throw new Error("Slide ID is required");
   }
-  if (!examinationDate) {
-    throw new Error("Examination date is required");
-  }
   if (!PIC) {
     throw new Error("PIC ID is required");
   }
   if (!DPJP) {
     throw new Error("DPJP ID is required");
   }
-  if (!examinationPlanDate) {
-    throw new Error("Examination plan date is required");
-  }
-
   const patient = await Patient.findById(patientId);
   if (!patient) {
     throw new Error("Patient not found");

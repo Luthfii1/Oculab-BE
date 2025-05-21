@@ -69,6 +69,92 @@ exports.postFOVData = async function (req, res) {
   }
 };
 
+exports.postFOVDataNew = async function (req, res) {
+  try {
+    const result = await fovService.postFOVDataNew(req.params, req.body);
+
+    sendResponse(res, ResponseType.SUCCESS, 201, result.message, result.data);
+  } catch (error) {
+    switch (error.message) {
+      case "Examination ID is required":
+      case "Image is required":
+      case "Type is required":
+      case "Order is required":
+      case "System count is required":
+      case "Confidence level is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The request is missing required fields."
+        );
+        break;
+
+      case "Examination not found":
+      case "Patient not found":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.RESOURCE_NOT_FOUND,
+          "The requested resource could not be found."
+        );
+        break;
+
+      case "Duplicate ID":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          409,
+          error.message,
+          null,
+          ErrorResponseType.DUPLICATE_ERROR,
+          "The provided ID already exists."
+        );
+        break;
+
+      default:
+        if (error.message.startsWith("Failed to create bounding boxes:")) {
+          sendResponse(
+            res,
+            ResponseType.ERROR,
+            500,
+            "Failed to create bounding boxes",
+            null,
+            ErrorResponseType.INTERNAL_SERVER,
+            error.message
+          );
+        } else if (error.message.startsWith("Failed to create FOV data:")) {
+          sendResponse(
+            res,
+            ResponseType.ERROR,
+            500,
+            "Failed to create FOV data",
+            null,
+            ErrorResponseType.INTERNAL_SERVER,
+            error.message
+          );
+        } else {
+          sendResponse(
+            res,
+            ResponseType.ERROR,
+            500,
+            "An error occurred while processing the request",
+            null,
+            ErrorResponseType.INTERNAL_SERVER,
+            error.message || "Unknown error"
+          );
+        }
+        break;
+    }
+  }
+};
+
 exports.getAllFOVByExaminationId = async function (req, res) {
   try {
     const result = await fovService.getAllFOVByExaminationId(req.params);
@@ -131,7 +217,7 @@ exports.updateVerifiedField = async function (req, res) {
       result
     );
   } catch (error) {
-    switch (error.message) { 
+    switch (error.message) {
       case "FOV ID is required":
         sendResponse(
           res,
@@ -168,5 +254,3 @@ exports.updateVerifiedField = async function (req, res) {
     }
   }
 };
-
-

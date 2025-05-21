@@ -2,6 +2,26 @@ const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid");
 const { FOVType } = require("../Enum/FOVType.enum");
 
+const BoundingBoxDataSchema = new mongoose.Schema(
+  {
+    boxes: {
+      type: [String],
+      required: false,
+    },
+    frameWidth: {
+      type: Number,
+      required: false,
+      default: 600,
+    },
+    frameHeight: {
+      type: Number,
+      required: false,
+      default: 600,
+    },
+  },
+  { _id: false } // No need for an ID
+);
+
 const FOVDataSchema = new mongoose.Schema(
   {
     _id: {
@@ -49,8 +69,8 @@ const FOVDataSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
-    boundingBoxData: {
-      type: [String],
+    boundingBoxes: {
+      type: BoundingBoxDataSchema,
       required: false,
     },
   },
