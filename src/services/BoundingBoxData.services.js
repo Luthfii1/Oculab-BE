@@ -13,22 +13,22 @@ exports.getBoundingBoxesByFovId = async function (params) {
     throw new Error("FOV not found");
   }
 
-  if (!fov.boundingBoxes) {
+  if (!fov.boundingBoxData) {
     throw new Error("No bounding box data available yet for this FOV");
   }
 
   let boxesData = [];
-  if (fov.boundingBoxes.boxes && fov.boundingBoxes.boxes.length > 0) {
+  if (fov.boundingBoxData.boxes && fov.boundingBoxData.boxes.length > 0) {
     boxesData = await Box.find({
-      _id: { $in: fov.boundingBoxes.boxes },
+      _id: { $in: fov.boundingBoxData.boxes },
     }).sort({ order: 1 });
   }
 
   return {
     message: "Bounding box data retrieved successfully",
     data: {
-      frameWidth: fov.boundingBoxes.frameWidth,
-      frameHeight: fov.boundingBoxes.frameHeight,
+      frameWidth: fov.boundingBoxData.frameWidth,
+      frameHeight: fov.boundingBoxData.frameHeight,
       boxes: boxesData,
     },
   };
