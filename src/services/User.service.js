@@ -11,12 +11,12 @@ const { generateUniqueUsername } = require("../utils/UsernameUtilities");
 const emailService = require("./Email.service");
 
 exports.login = async function (body) {
-  const { username, password } = body;
-  if (!username || !password) {
+  const { email, password } = body;
+  if (!email || !password) {
     throw new Error("Username and password are required");
   }
 
-  const existingUser = await User.findOne({ username: username });
+  const existingUser = await User.findOne({ email: email });
   if (!existingUser) {
     throw new Error("User doesn't exist");
   }
@@ -55,7 +55,7 @@ exports.register = async function (body) {
     throw new Error("User already exists");
   }
 
-  const username = await generateUniqueUsername(name);
+  // const username = await generateUniqueUsername(name);
   const randomPassword = generateRandomPassword();
   const hashedPassword = hashPassword(randomPassword);
 
@@ -69,7 +69,6 @@ exports.register = async function (body) {
     name: name,
     role: role,
     email: email,
-    username: username,
     password: hashedPassword,
     accessPin: accessPin,
   });
@@ -77,12 +76,12 @@ exports.register = async function (body) {
   try {
     await Promise.all([
       newUser.save(),
-      emailService.sendWelcomeEmail(email, username, randomPassword),
+      emailService.sendWelcomeEmail(email, randomPassword),
     ]);
 
     return {
       userId: newUser._id,
-      username: newUser.username,
+      email: newUser.email,
       currentPassword: randomPassword,
     };
   } catch (error) {
@@ -193,7 +192,7 @@ exports.updateUserPassword = async function (body, params) {
 
   return {
     userId: existingUser._id,
-    username: existingUser.username,
+    email: existingUser.email,
     newPassword: newPassword,
   };
 };
@@ -203,8 +202,7 @@ exports.updateUser = async function (body, params) {
   if (!userId || userId === ":userId") {
     throw new Error("User ID is required");
   }
-
-  const { name, role, email, password, accessPin, previousPassword } = body;
+  const { name, role, email, password, accessPin } = body;
 
   const existingUser = await User.findById(userId);
   if (!existingUser) {
