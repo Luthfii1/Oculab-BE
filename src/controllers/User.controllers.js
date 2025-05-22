@@ -326,68 +326,6 @@ exports.getAllPics = async function (req, res) {
   }
 };
 
-exports.updateUser = async function (req, res) {
-  try {
-    const result = await userServices.updateUser(req.body, req.params);
-
-    sendResponse(
-      res,
-      ResponseType.SUCCESS,
-      200,
-      "User updated successfully",
-      result
-    );
-  } catch (error) {
-    switch (error.message) {
-      case "User ID is required":
-      case "Previous password is required":
-        sendResponse(
-          res,
-          ResponseType.ERROR,
-          400,
-          error.message,
-          null,
-          ErrorResponseType.VALIDATION_ERROR,
-          error.message
-        );
-        break;
-      case "User not found":
-        sendResponse(
-          res,
-          ResponseType.ERROR,
-          404,
-          error.message,
-          null,
-          ErrorResponseType.RESOURCE_NOT_FOUND,
-          "User not found"
-        );
-        break;
-      case "Incorrect previous password":
-        sendResponse(
-          res,
-          ResponseType.ERROR,
-          401,
-          error.message,
-          null,
-          ErrorResponseType.PERMISSION_ERROR,
-          "Incorrect previous password"
-        );
-        break;
-      default:
-        sendResponse(
-          res,
-          ResponseType.ERROR,
-          500,
-          error.message,
-          null,
-          ErrorResponseType.INTERNAL_VALIDATION_ERROR,
-          error.message
-        );
-        break;
-    }
-  }
-};
-
 exports.updateUserPassword = async function (req, res) {
   try {
     const result = await userServices.updateUserPassword(req.body, req.params);
@@ -402,8 +340,38 @@ exports.updateUserPassword = async function (req, res) {
   } catch (error) {
     switch (error.message) {
       case "User ID is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The request is missing the required user ID."
+        );
+        break;
       case "New and previous password is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "Both new and previous passwords must be provided."
+        );
+        break;
       case "Invalid previous password":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The previous password provided is incorrect."
+        );
+        break;
       case "Password must be different from the previous one":
         sendResponse(
           res,
@@ -412,7 +380,118 @@ exports.updateUserPassword = async function (req, res) {
           error.message,
           null,
           ErrorResponseType.VALIDATION_ERROR,
-          error.message
+          "The new password must be different from the current password."
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          "Failed to update password",
+          null,
+          ErrorResponseType.INTERNAL_SERVER,
+          error.message || "An unexpected error occurred."
+        );
+        break;
+    }
+  }
+};
+
+exports.updateUserAccessPin = async function (req, res) {
+  try {
+    const result = await userServices.updateUserAccessPin(req.body, req.params);
+
+    sendResponse(
+      res,
+      ResponseType.SUCCESS,
+      200,
+      "User's access PIN updated successfully",
+      result
+    );
+  } catch (error) {
+    switch (error.message) {
+      case "User ID is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The request is missing the required user ID."
+        );
+        break;
+      case "New and previous password is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "Both new and previous access PINs must be provided."
+        );
+        break;
+      case "Invalid previous password":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The previous access PIN provided is incorrect."
+        );
+        break;
+      case "Password must be different from the previous one":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The new access PIN must be different from the current PIN."
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          "Failed to update access PIN",
+          null,
+          ErrorResponseType.INTERNAL_SERVER,
+          error.message || "An unexpected error occurred."
+        );
+        break;
+    }
+  }
+};
+
+exports.updateUser = async function (req, res) {
+  try {
+    const result = await userServices.updateUser(req.body, req.params);
+
+    sendResponse(
+      res,
+      ResponseType.SUCCESS,
+      200,
+      "User updated successfully",
+      result
+    );
+  } catch (error) {
+    switch (error.message) {
+      case "User ID is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The request is missing the required user ID."
         );
         break;
       case "User not found":
@@ -423,23 +502,161 @@ exports.updateUserPassword = async function (req, res) {
           error.message,
           null,
           ErrorResponseType.RESOURCE_NOT_FOUND,
-          "User not found"
+          "No user found with the provided ID."
         );
         break;
-      default:
+      case "Email cannot be changed":
         sendResponse(
           res,
           ResponseType.ERROR,
-          500,
+          400,
           error.message,
           null,
-          ErrorResponseType.INTERNAL_VALIDATION_ERROR,
-          error.message
+          ErrorResponseType.VALIDATION_ERROR,
+          "Email addresses are not allowed to be modified."
         );
+        break;
+      default:
+        if (error.message.startsWith("Invalid role")) {
+          sendResponse(
+            res,
+            ResponseType.ERROR,
+            400,
+            error.message,
+            null,
+            ErrorResponseType.VALIDATION_ERROR,
+            "The provided role is not valid."
+          );
+        } else {
+          sendResponse(
+            res,
+            ResponseType.ERROR,
+            500,
+            "Failed to update user",
+            null,
+            ErrorResponseType.INTERNAL_SERVER,
+            error.message || "An unexpected error occurred."
+          );
+        }
         break;
     }
   }
 };
+
+// exports.updateUser = async function (req, res) {
+//   try {
+//     const result = await userServices.updateUser(req.body, req.params);
+
+//     sendResponse(
+//       res,
+//       ResponseType.SUCCESS,
+//       200,
+//       "User updated successfully",
+//       result
+//     );
+//   } catch (error) {
+//     switch (error.message) {
+//       case "User ID is required":
+//       case "Previous password is required":
+//         sendResponse(
+//           res,
+//           ResponseType.ERROR,
+//           400,
+//           error.message,
+//           null,
+//           ErrorResponseType.VALIDATION_ERROR,
+//           error.message
+//         );
+//         break;
+//       case "User not found":
+//         sendResponse(
+//           res,
+//           ResponseType.ERROR,
+//           404,
+//           error.message,
+//           null,
+//           ErrorResponseType.RESOURCE_NOT_FOUND,
+//           "User not found"
+//         );
+//         break;
+//       case "Incorrect previous password":
+//         sendResponse(
+//           res,
+//           ResponseType.ERROR,
+//           401,
+//           error.message,
+//           null,
+//           ErrorResponseType.PERMISSION_ERROR,
+//           "Incorrect previous password"
+//         );
+//         break;
+//       default:
+//         sendResponse(
+//           res,
+//           ResponseType.ERROR,
+//           500,
+//           error.message,
+//           null,
+//           ErrorResponseType.INTERNAL_VALIDATION_ERROR,
+//           error.message
+//         );
+//         break;
+//     }
+//   }
+// };
+
+// exports.updateUserPassword = async function (req, res) {
+//   try {
+//     const result = await userServices.updateUserPassword(req.body, req.params);
+
+//     sendResponse(
+//       res,
+//       ResponseType.SUCCESS,
+//       200,
+//       "User's password updated successfully",
+//       result
+//     );
+//   } catch (error) {
+//     switch (error.message) {
+//       case "User ID is required":
+//       case "New and previous password is required":
+//       case "Invalid previous password":
+//       case "Password must be different from the previous one":
+//         sendResponse(
+//           res,
+//           ResponseType.ERROR,
+//           400,
+//           error.message,
+//           null,
+//           ErrorResponseType.VALIDATION_ERROR,
+//           error.message
+//         );
+//         break;
+//       case "User not found":
+//         sendResponse(
+//           res,
+//           ResponseType.ERROR,
+//           404,
+//           error.message,
+//           null,
+//           ErrorResponseType.RESOURCE_NOT_FOUND,
+//           "User not found"
+//         );
+//         break;
+//       default:
+//         sendResponse(
+//           res,
+//           ResponseType.ERROR,
+//           500,
+//           error.message,
+//           null,
+//           ErrorResponseType.INTERNAL_VALIDATION_ERROR,
+//           error.message
+//         );
+//         break;
+//     }
+//   }
+// };
 
 exports.deleteUser = async function (req, res) {
   try {
