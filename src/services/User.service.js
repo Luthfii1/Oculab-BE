@@ -7,13 +7,13 @@ const {
   hashPassword,
   generateRandomPassword,
 } = require("../utils/PasswordUtilities");
-const { generateUniqueUsername } = require("../utils/UsernameUtilities");
 const emailService = require("./Email.service");
+const { RolesType } = require("../models/Enum/RolesType.enum");
 
 exports.login = async function (body) {
   const { email, password } = body;
   if (!email || !password) {
-    throw new Error("Username and password are required");
+    throw new Error("Email and password are required");
   }
 
   const existingUser = await User.findOne({ email: email });
@@ -197,48 +197,72 @@ exports.updateUserPassword = async function (body, params) {
   };
 };
 
+exports.updateUserAccessPin = async function (body, params) {
+  const { userId } = params;
+  if (!userId || userId === ":userId") {
+    throw new Error("User ID is required");
+  }
+
+  const { newAccessPin, previousAccessPin } = body;
+  if (!newAccessPin || !previousAccessPin) {
+    throw new Error("New and previous password is required");
+  }
+
+  const existingUser = await User.findById(userId);
+
+  if (previousAccessPin !== existingUser.accessPin) {
+    throw new Error("Invalid previous password"); //check if user's new pass input matched the actual pass
+  }
+
+  if (newAccessPin == existingUser.accessPin) {
+    throw new Error("Password must be different from the previous one");
+  }
+
+  existingUser.accessPin = newAccessPin;
+  await existingUser.save();
+
+  return {
+    userId: existingUser._id,
+    email: existingUser.email,
+    newAccessPin: existingUser.accessPin,
+  };
+};
+
 exports.updateUser = async function (body, params) {
   const { userId } = params;
   if (!userId || userId === ":userId") {
     throw new Error("User ID is required");
   }
-  const { name, role, email, password, accessPin } = body;
+  const { name, role, email } = body;
 
   const existingUser = await User.findById(userId);
   if (!existingUser) {
     throw new Error("User not found");
   }
 
+  if (email && email !== existingUser.email) {
+    throw new Error("Email cannot be changed");
+  }
+
   if (name) {
     existingUser.name = name;
   }
   if (role) {
+    const validRoles = Object.values(RolesType);
+    if (!validRoles.includes(role)) {
+      throw new Error(`Invalid role. Must be one of: ${validRoles.join(", ")}`);
+    }
     existingUser.role = role;
-  }
-  if (email) {
-    existingUser.email = email;
-  }
-  if (password) {
-    if (!previousPassword) {
-      throw new Error("Previous password is required");
-    }
-    const hashedPreviousPassword = hashPassword(previousPassword);
-    if (hashedPreviousPassword !== existingUser.password) {
-      throw new Error("Incorrect previous password");
-    }
-
-    existingUser.password = hashPassword(password);
-  }
-  if (accessPin) {
-    existingUser.accessPin = accessPin;
   }
 
   await existingUser.save();
-  const userResponse = existingUser.toObject();
-  delete userResponse.password;
-  delete userResponse.__v;
 
-  return userResponse;
+  return {
+    userId: existingUser._id,
+    name: existingUser.name,
+    role: existingUser.role,
+    email: existingUser.email,
+  };
 };
 
 exports.deleteUser = async function (params) {

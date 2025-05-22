@@ -78,7 +78,7 @@
  * @swagger
  * /user/get-all-user-data:
  *   get:
- *     summary: Get all users (admin only)
+ *     summary: Get all users (Admin only)
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -90,6 +90,132 @@
  *       403:
  *         description: Forbidden
  */
+/**
+ * @swagger
+ * /user/update-user/{userId}:
+ *   put:
+ *     summary: Update user information (Admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user to update
+ *         example: user-id-1234
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: User's full name (optional)
+ *                 example: John Doe
+ *               role:
+ *                 type: string
+ *                 enum: [ADMIN, LAB]
+ *                 description: User's role in the system (optional)
+ *                 example: LAB
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address (cannot be changed - will result in error if different)
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: User updated successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                       example: user-id-1234
+ *                     name:
+ *                       type: string
+ *                       example: John Doe
+ *                     role:
+ *                       type: string
+ *                       example: LAB
+ *                     email:
+ *                       type: string
+ *                       example: user@example.com
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: Email cannot be changed
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     errorType:
+ *                       type: string
+ *                       example: VALIDATION_ERROR
+ *                     description:
+ *                       type: string
+ *                       example: Email addresses are not allowed to be modified.
+ *       401:
+ *         description: Unauthorized - Token required
+ *       403:
+ *         description: Forbidden - Admin role required
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 404
+ *                 message:
+ *                   type: string
+ *                   example: User not found
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     errorType:
+ *                       type: string
+ *                       example: RESOURCE_NOT_FOUND
+ *                     description:
+ *                       type: string
+ *                       example: No user found with the provided ID.
+ *       500:
+ *         description: Internal server error
+ */
 
 /**
  * @swagger
@@ -97,13 +223,18 @@
  *   put:
  *     summary: Update user password
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
  *         schema:
  *           type: string
+ *         description: ID of the user whose password to update
+ *         example: user-id-1234
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -114,15 +245,164 @@
  *             properties:
  *               newPassword:
  *                 type: string
+ *                 description: The new password for the user
+ *                 example: newSecurePassword123
  *               previousPassword:
  *                 type: string
+ *                 description: The current password for verification
+ *                 example: oldPassword123
  *     responses:
  *       200:
- *         description: Password updated
+ *         description: Password updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: User's password updated successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                       example: user-id-1234
+ *                     email:
+ *                       type: string
+ *                       example: user@example.com
+ *                     newPassword:
+ *                       type: string
+ *                       example: newSecurePassword123
  *       400:
- *         description: Missing input, incorrect previous password, or unchanged password
- *       404:
- *         description: User not found
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: Invalid previous password
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     errorType:
+ *                       type: string
+ *                       example: VALIDATION_ERROR
+ *                     description:
+ *                       type: string
+ *                       example: The previous password provided is incorrect.
+ *       401:
+ *         description: Unauthorized - Token required
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /user/update-user-accessPin/{userId}:
+ *   put:
+ *     summary: Update user access PIN
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user whose access PIN to update
+ *         example: user-id-1234
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newAccessPin
+ *               - previousAccessPin
+ *             properties:
+ *               newAccessPin:
+ *                 type: string
+ *                 description: The new access PIN for the user
+ *                 example: "123456"
+ *               previousAccessPin:
+ *                 type: string
+ *                 description: The current access PIN for verification
+ *                 example: "654321"
+ *     responses:
+ *       200:
+ *         description: Access PIN updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: User's access PIN updated successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                       example: user-id-1234
+ *                     email:
+ *                       type: string
+ *                       example: user@example.com
+ *                     newAccessPin:
+ *                       type: string
+ *                       example: "123456"
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: Invalid previous password
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     errorType:
+ *                       type: string
+ *                       example: VALIDATION_ERROR
+ *                     description:
+ *                       type: string
+ *                       example: The previous access PIN provided is incorrect.
+ *       401:
+ *         description: Unauthorized - Token required
+ *       500:
+ *         description: Internal server error
  */
 
 /**

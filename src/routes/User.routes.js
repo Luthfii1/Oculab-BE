@@ -34,6 +34,11 @@ router.put(
   authenticateToken,
   userControllers.updateUserPassword
 );
+router.put(
+  "/update-user-accessPin/:userId",
+  authenticateToken,
+  userControllers.updateUserAccessPin
+);
 router.delete(
   "/delete-user/:userId",
   authenticateToken,
