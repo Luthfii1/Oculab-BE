@@ -14,10 +14,11 @@ exports.getDataForPDF = async function (examinationId) {
   }
 
   // Fetch all required data in parallel
-  const [patient, laborant, expertResult] = await Promise.all([
+  const [patient, laborant, expertResult, dpjp] = await Promise.all([
     Patient.findOne({ resultExamination: examinationId }),
     User.findOne({ _id: examination.PIC }),
-    ExpertExamResult.findOne({ _id: examination.expertResult })
+    ExpertExamResult.findOne({ _id: examination.expertResult }),
+    User.findOne({ _id: examination.DPJP })
   ]);
 
   // Validate required data
@@ -43,15 +44,16 @@ exports.getDataForPDF = async function (examinationId) {
       preparatPDFData: {
         id: examination.slideId,
         place: "-",
-        laborant: laborant.name
+        laborant: laborant.name,
+        dpjp: dpjp.name
       },
       hasilPDFData: {
         tujuan: examination.goal,
         jenisUji: examination.preparationType,
         hasil: expertResult.finalGrading,
         idSediaan: examination.slideId,
-        descInterpretasi: "Pelaporan BTA pada Sediaan dengan Pewarnaan Z-N berdasarkan Rekomendasi IUALTD/WHO. Hasil positif pada sediaan BTA (Bakteri Tahan Asam) menjadi indikasi awal adanya infeksi mikobakteri dan potensi penyakit TB. Positifnya hasil sediaan dan tingkatan BTA mencerminkan beban bakteri relatif dan terkait dengan gejala penyakit. Terapi pasien untuk TB dapat dimulai berdasarkan hasil sediaan dan presentasi klinis, dengan perubahan status BTA yang penting untuk memantau respons terapi. NOTES: PERLU DIGANTI DI MASA DEPAN",
-        descNotesPetugas: expertResult.notes
+        descInterpretasi: "Pelaporan BTA pada Sediaan dengan Pewarnaan Z-N berdasarkan Rekomendasi IUALTD/WHO. Hasil positif pada sediaan BTA (Bakteri Tahan Asam) menjadi indikasi awal adanya infeksi mikobakteri dan potensi penyakit TB. Positifnya hasil sediaan dan tingkatan BTA mencerminkan beban bakteri relatif dan terkait dengan gejala penyakit. Terapi pasien untuk TB dapat dimulai berdasarkan hasil sediaan dan presentasi klinis, dengan perubahan status BTA yang penting untuk memantau respons terapi.",
+        descNotesPetugas: expertResult.notes || "tidak ada catatan"
       }
     }
   };
