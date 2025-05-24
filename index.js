@@ -26,7 +26,7 @@ const expertResultRoutes = require("./src/routes/ExpertExamResult.routes");
 const aiAnalysisProgressRoutes = require("./src/routes/AIAnalysisProgressTracking.routes");
 const contactRoutes = require("./src/routes/Contact.routes");
 const boundingBoxRoutes = require("./src/routes/BoundingBoxData.routes");
-
+const pdfRoutes = require("./src/routes/PDF.routes");
 const constants = require("./src/config/constants");
 
 // Set up the server
@@ -67,6 +67,7 @@ app.use("/expertResult", expertResultRoutes);
 app.use("/aiAnalysisProgress", aiAnalysisProgressRoutes);
 app.use("/contact", contactRoutes);
 app.use("/boundingBox", boundingBoxRoutes);
+app.use("/pdf", pdfRoutes);
 
 const port = process.env.PORT || 3000;
 
