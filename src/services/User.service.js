@@ -55,7 +55,6 @@ exports.register = async function (body) {
     throw new Error("User already exists");
   }
 
-  // const username = await generateUniqueUsername(name);
   const randomPassword = generateRandomPassword();
   const hashedPassword = hashPassword(randomPassword);
 
