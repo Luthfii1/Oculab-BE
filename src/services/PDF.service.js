@@ -14,10 +14,11 @@ exports.getDataForPDF = async function (examinationId) {
   }
 
   // Fetch all required data in parallel
-  const [patient, laborant, expertResult] = await Promise.all([
+  const [patient, laborant, expertResult, dpjp] = await Promise.all([
     Patient.findOne({ resultExamination: examinationId }),
     User.findOne({ _id: examination.PIC }),
-    ExpertExamResult.findOne({ _id: examination.expertResult })
+    ExpertExamResult.findOne({ _id: examination.expertResult }),
+    User.findOne({ _id: examination.DPJP })
   ]);
 
   // Validate required data
@@ -43,7 +44,8 @@ exports.getDataForPDF = async function (examinationId) {
       preparatPDFData: {
         id: examination.slideId,
         place: "-",
-        laborant: laborant.name
+        laborant: laborant.name,
+        dpjp: dpjp.name
       },
       hasilPDFData: {
         tujuan: examination.goal,
