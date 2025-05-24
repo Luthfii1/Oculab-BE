@@ -518,3 +518,66 @@ exports.getFinishedExaminationCardData = async function (req, res) {
     }
   }
 };
+
+exports.isAllFOVVerified = async function (req, res) {
+  try {
+    const result = await ExaminationService.isAllFOVVerified(req.params);
+    sendResponse(
+      res,
+      ResponseType.SUCCESS,
+      200,
+      result.message,
+      {
+        message: "success to check if all FOV is verified",
+        isAllFOVVerified: result,
+      }
+    );
+  } catch (error) {
+    switch (error.message) {
+      case "Examination ID is required":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          400,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "The request is missing the required examination ID."
+        );
+        break;
+      case "Examination not found":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "No examination found with the provided ID."
+        );
+        break;
+      case "No FOV data found for this examination":
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          404,
+          error.message,
+          null,
+          ErrorResponseType.VALIDATION_ERROR,
+          "No FOV data found for this examination."
+        );
+        break;
+      default:
+        sendResponse(
+          res,
+          ResponseType.ERROR,
+          500,
+          "Internal server error",
+          null,
+          ErrorResponseType.INTERNAL_SERVER,
+          error.message || "An unexpected error occurred."
+        );
+        break;
+    }
+  }
+};

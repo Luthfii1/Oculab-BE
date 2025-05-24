@@ -48,5 +48,9 @@ router.get(
   "/get-finished-examination-card-data/:userId/:date",
   examinationControllers.getFinishedExaminationCardData
 );
+router.get(
+  "/is-all-fov-verified/:examinationId",
+  examinationControllers.isAllFOVVerified
+);
 
 module.exports = router;
