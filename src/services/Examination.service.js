@@ -629,31 +629,3 @@ exports.getFinishedExaminationCardData = async function (params) {
 
   return { data: cardData };
 };
-
-exports.isAllFOVVerified = async function (params) {
-  const { examinationId } = params;
-  if (!examinationId || examinationId === ":examinationId") {
-    throw new Error("Examination ID is required");
-  }
-
-  const examination = await Examination.findById(examinationId);
-  if (!examination) {
-    throw new Error("Examination not found");
-  }
-
-  // get all FOVS id from examination and check if all fovs is verified
-  const fovs = examination.FOV;
-  const fovData = await FOVData.find({
-    _id: { $in: fovs },
-  });
-
-  if (!fovData || fovData.length === 0) {
-    throw new Error("No FOV data found for this examination");
-  }
-
-  // check if all fov data is verified = true or not
-  const isAllFOVVerified = fovData.every((fov) => fov.verified);
-
-  return isAllFOVVerified
-};
-
