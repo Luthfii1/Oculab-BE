@@ -599,6 +599,7 @@ exports.getFinishedExaminationCardData = async function (params) {
     patient.resultExamination.forEach((examId) => {
       if (examinationIds.includes(examId)) {
         patientByExamId[examId] = {
+          id: patient._id,
           name: patient.name,
           dob: patient.DoB,
         };
@@ -613,10 +614,9 @@ exports.getFinishedExaminationCardData = async function (params) {
     };
 
     return {
-      id: exam._id,
+      examinationId: exam._id,
+      patientId: patientInfo.id,
       slideId: exam.slideId,
-      examinationDate: exam.examinationDate,
-      statusExamination: exam.statusExamination,
       patientName: patientInfo.name,
       patientDob: patientInfo.dob,
       dpjpName: dpjpMap[exam.DPJP] || "Unknown",

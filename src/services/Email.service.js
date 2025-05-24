@@ -1,21 +1,21 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 // Create reusable transporter object using SMTP transport
 const transporter = nodemailer.createTransport({
-  service: 'gmail',  // Use Gmail service
+  service: "gmail", // Use Gmail service
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
 });
 
-exports.sendWelcomeEmail = async (userEmail, username, password) => {
-  const appUrl = process.env.APP_URL || 'http://localhost:3000';
-  
+exports.sendWelcomeEmail = async (userEmail, password) => {
+  const appUrl = process.env.APP_URL || "http://localhost:3000";
+
   const mailOptions = {
     from: `"Oculab" <${process.env.SMTP_USER}>`,
-    to: userEmail,
-    subject: 'Welcome to Oculab - Your Account Details',
+    to: userEmaill,
+    subject: "Welcome to Oculab - Your Account Details",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Welcome to Oculab! 🎉</h2>
@@ -23,7 +23,7 @@ exports.sendWelcomeEmail = async (userEmail, username, password) => {
         <p>Your account has been successfully created. Here are your login credentials:</p>
         
         <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <p><strong>Username:</strong> ${username}</p>
+          <p><strong>Email:</strong> ${userEmail}</p>
           <p><strong>Temporary Password:</strong> ${password}</p>
         </div>
         
@@ -44,6 +44,6 @@ exports.sendWelcomeEmail = async (userEmail, username, password) => {
   try {
     await transporter.sendMail(mailOptions);
   } catch (error) {
-    throw new Error('Failed to send welcome email');
+    throw new Error("Failed to send welcome email");
   }
-}; 
+};
